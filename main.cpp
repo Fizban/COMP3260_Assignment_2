@@ -10,8 +10,152 @@ using namespace std;
  * 7.Avalanche Analysis
  *
  *
+ * Initial Permutation:
+
+            58    50   42    34    26   18    10    2
+            60    52   44    36    28   20    12    4
+            62    54   46    38    30   22    14    6
+            64    56   48    40    32   24    16    8
+            57    49   41    33    25   17     9    1
+            59    51   43    35    27   19    11    3
+            61    53   45    37    29   21    13    5
+            63    55   47    39    31   23    15    7
+ *
+ *
+ *
+ * Inverse Permutation:
+ *
+ *                              IP-1
+
+            40     8   48    16    56   24    64   32
+            39     7   47    15    55   23    63   31
+            38     6   46    14    54   22    62   30
+            37     5   45    13    53   21    61   29
+            36     4   44    12    52   20    60   28
+            35     3   43    11    51   19    59   27
+            34     2   42    10    50   18    58   26
+            33     1   41     9    49   17    57   25
+ *
+ *
  */
+
+/* ==========================================================================================================
+ * ----------------------------------------------------------------------------------------------------------
+ * ----------------------------------------------FUNCTION DECLARATIONS---------------------------------------
+ * ----------------------------------------------------------------------------------------------------------
+ * ==========================================================================================================*/
+
+
+int* GetLeftSplit(int plaintext[]);
+int* GetRightSplit(int plaintext[]);
+
+int* Permutatekey(int target[],int permutatemap[]);
+
+void PrintArray(int *arr,int size);
+
+
+
+
+/* ==========================================================================================================
+ * ----------------------------------------------------------------------------------------------------------
+ * ----------------------------------------------MAIN BODY OF PROGRAM---------------------------------------
+ * ----------------------------------------------------------------------------------------------------------
+ * ==========================================================================================================*/
+
 int main() {
+
+    //Initialize the key to use "temporary" will be implemented through file read later
+    int Key[64]=
+            {
+                    1,0,0,0,1,0,1,0,
+                    1,1,1,1,1,0,0,0,
+                    1,1,1,1,1,0,0,0,
+                    1,0,1,0,0,1,0,1,
+                    1,1,1,1,0,0,1,0,
+                    1,1,1,1,0,1,0,1,
+                    1,0,0,0,0,1,1,0,
+                    1,0,1,0,0,1,0,1
+
+            };
+    //Initializing the plaintext "temporary" will be implemented through file read later
+    int plaintext[64]=
+            {
+                    0,0,0,0,0,0,0,1,
+                    0,0,1,0,0,0,1,1,
+                    0,1,0,0,1,0,1,0,
+                    0,1,1,0,1,1,1,1,
+                    0,0,0,1,0,0,1,0,
+                    1,0,1,0,1,0,1,1,
+                    1,0,0,1,1,0,1,1,
+                    1,1,0,1,1,1,1,1
+            };
+
+    //Left and right splits on the plaintext
+    //Left takes the 1st 32 bits, and right the last 32.
+    int *PlainL = GetLeftSplit(plaintext);
+    int *PlainR = GetRightSplit(plaintext);
+    cout<<"Left split of plaintext:"<<endl;
+    PrintArray(PlainL,32);
+    cout<<"Right split of plaintext:"<<endl;
+    PrintArray(PlainR,32);
+
+
+
+    //Initializing the array for which Keys will be permutated
+    int KeyPerm[56]
+    {
+    57,49,41,33,25,17,9 ,
+    1 ,58,50,42,34,26,18,
+    10,2 ,59,51,43,35,27,
+    19,11,3 ,60,52,44,36,
+    63,55,47,39,31,23,15,
+    7 ,62,54,46,38,30,22,
+    14,6 ,61,53,45,37,29,
+    21,13,5 ,28,20,12,4 ,
+    };
+    //Permutate the ket using function
+    int *PermKey = Permutatekey(Key,KeyPerm);
+
+    cout<<"Inital Key:"<<endl;
+    PrintArray(Key,64);
+    cout<<"Permutate Key;"<<endl;
+    PrintArray(PermKey,56);
+
+
+    //Initialising the Inital table to swap bits with the PlainText Bit-stream
+    int InitalPerm[64] =
+    {
+        58,    50,   42,    34,    26,   18,    10,    2,
+        60,    52,   44,    36,    28,   20,    12,    4,
+        62,    54,   46,    38,    30,   22,    14,    6,
+        64,    56,   48,    40,    32,   24,    16,    8,
+        57,    49,   41,    33,    25,   17,     9,    1,
+        59,    51,   43,    35,    27,   19,    11,    3,
+        61,    53,   45,    37,    29,   21,    13,    5,
+        63,    55,   47,    39,    31,   23,    15,    7,
+    };
+
+    //Initialising the Final table to swap bits with the PlainText Bit-stream
+    int InversePerm[64] =
+    {
+            40,     8,   48,    16,    56,   24,    64,   32,
+            39,     7,   47,    15,    55,   23,    63,   31,
+            38,     6,   46,    14,    54,   22,    62,   30,
+            37,     5,   45,    13,    53,   21,    61,   29,
+            36,     4,   44,    12,    52,   20,    60,   28,
+            35,     3,   43,    11,    51,   19,    59,   27,
+            34,     2,   42,    10,    50,   18,    58,   26,
+            33,     1,   41,     9,    49,   17,    57,   25,
+    };
+
+
+
+
+
+
+
+
+
     int sbox_array[8][4][16]=
             {   {
                         14,4,13,1,2,15,11,8,3,10,6,12,5,9,0,7,
@@ -73,3 +217,66 @@ int main() {
     //Test part 2 1
 }
 
+
+/* ==========================================================================================================
+ * ----------------------------------------------------------------------------------------------------------
+ * ----------------------------------------------FUNCTION IMPLEMENTATIONS------------------------------------
+ * ----------------------------------------------------------------------------------------------------------
+ * ==========================================================================================================*/
+
+int* GetLeftSplit(int plaintext[])
+{
+  //Initialize the array to be returned
+  static int LeftArr[32];
+  for(int i=0;i<32;i++)
+  {
+      LeftArr[i]=plaintext[i];
+  }
+  return LeftArr;
+
+}
+
+int* GetRightSplit(int plaintext[])
+{
+    static int RightArr[32];
+    int j=0;
+    for(int i=32;i<64;i++)
+    {
+        RightArr[j]=plaintext[i];
+        j++;
+    }
+    return RightArr;
+}
+
+
+void PrintArray(int *arr,int size)
+{
+    //Step through the array until specified "size" is reached
+    for(int i=0;i<size;i++)
+    {
+        //Just using this if else to make output look neat. Adds comma to end of each element unless its the last element, where it will add new line.
+        if(i!=size-1)
+        {
+            cout<<arr[i]<<", ";
+        }
+        else
+        {
+            cout<<arr[i]<<endl;
+        }
+    }
+
+
+}
+
+
+int* Permutatekey(int target[],int permutatemap[])
+{
+    static int Result[56];
+
+    for(int i=0;i<56;i++)
+    {
+        Result[i]=target[permutatemap[i]];
+    }
+
+    return Result;
+}
