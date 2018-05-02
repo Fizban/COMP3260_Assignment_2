@@ -1,4 +1,7 @@
 #include <iostream>
+#include <vector>
+
+
 using namespace std;
 /* https://github.com/Fizban/COMP3260_Assignment_2/commits/master
  * 1.Fileread/Write
@@ -46,12 +49,12 @@ using namespace std;
  * ==========================================================================================================*/
 
 
-int* GetLeftSplit(int plaintext[]);
-int* GetRightSplit(int plaintext[]);
+vector<int> GetLeftSplit(vector<int> target);
+vector<int> GetRightSplit(vector<int> target);
 
-int* Permutatekey(int target[],int permutatemap[]);
+vector<int> Permutatekey(vector<int> target,vector<int> permutatemap);
 
-void PrintArray(int *arr,int size);
+void PrintArray(vector<int> target);
 
 
 
@@ -65,7 +68,7 @@ void PrintArray(int *arr,int size);
 int main() {
 
     //Initialize the key to use "temporary" will be implemented through file read later
-    int Key[64]=
+    vector<int> Key=
             {
                     1,0,0,0,1,0,1,0,
                     1,1,1,1,1,0,0,0,
@@ -78,7 +81,7 @@ int main() {
 
             };
     //Initializing the plaintext "temporary" will be implemented through file read later
-    int plaintext[64]=
+    vector<int> plaintext=
             {
                     0,0,0,0,0,0,0,1,
                     0,0,1,0,0,0,1,1,
@@ -92,17 +95,17 @@ int main() {
 
     //Left and right splits on the plaintext
     //Left takes the 1st 32 bits, and right the last 32.
-    int *PlainL = GetLeftSplit(plaintext);
-    int *PlainR = GetRightSplit(plaintext);
+    vector<int> PlainL = GetLeftSplit(plaintext);
+    vector<int> PlainR = GetRightSplit(plaintext);
     cout<<"Left split of plaintext:"<<endl;
-    PrintArray(PlainL,32);
+    PrintArray(PlainL);
     cout<<"Right split of plaintext:"<<endl;
-    PrintArray(PlainR,32);
+    PrintArray(PlainR);
 
 
 
     //Initializing the array for which Keys will be permutated
-    int KeyPerm[56]
+    vector<int> KeyPerm
     {
     57,49,41,33,25,17,9 ,
     1 ,58,50,42,34,26,18,
@@ -114,12 +117,13 @@ int main() {
     21,13,5 ,28,20,12,4 ,
     };
     //Permutate the ket using function
-    int *PermKey = Permutatekey(Key,KeyPerm);
+
+    vector<int> PermKey = Permutatekey(Key,KeyPerm);
 
     cout<<"Inital Key:"<<endl;
-    PrintArray(Key,64);
+    PrintArray(Key);
     cout<<"Permutate Key;"<<endl;
-    PrintArray(PermKey,56);
+    PrintArray(PermKey);
 
 
     //Initialising the Inital table to swap bits with the PlainText Bit-stream
@@ -224,44 +228,44 @@ int main() {
  * ----------------------------------------------------------------------------------------------------------
  * ==========================================================================================================*/
 
-int* GetLeftSplit(int plaintext[])
+vector<int> GetLeftSplit(vector<int> target)
 {
   //Initialize the array to be returned
-  static int LeftArr[32];
-  for(int i=0;i<32;i++)
+  static vector<int> LeftVec;
+  for(unsigned int i=0;i<target.size()/2;i++)
   {
-      LeftArr[i]=plaintext[i];
+      LeftVec.push_back(target[i]);
   }
-  return LeftArr;
+  return LeftVec;
 
 }
 
-int* GetRightSplit(int plaintext[])
+vector<int> GetRightSplit(vector<int> target)
 {
-    static int RightArr[32];
+    static vector<int> RightVec;
     int j=0;
-    for(int i=32;i<64;i++)
+    for(unsigned int i=target.size()/2;i<64;i++)
     {
-        RightArr[j]=plaintext[i];
+        RightVec.push_back(target[i]);
         j++;
     }
-    return RightArr;
+    return RightVec;
 }
 
 
-void PrintArray(int *arr,int size)
+void PrintArray(vector<int> target)
 {
     //Step through the array until specified "size" is reached
-    for(int i=0;i<size;i++)
+    for(unsigned int i=0;i<target.size();i++)
     {
         //Just using this if else to make output look neat. Adds comma to end of each element unless its the last element, where it will add new line.
-        if(i!=size-1)
+        if(i!=target.size()-1)
         {
-            cout<<arr[i]<<", ";
+            cout<<target[i]<<", ";
         }
         else
         {
-            cout<<arr[i]<<endl;
+            cout<<target[i]<<endl;
         }
     }
 
@@ -269,13 +273,13 @@ void PrintArray(int *arr,int size)
 }
 
 
-int* Permutatekey(int target[],int permutatemap[])
+vector<int> Permutatekey(vector<int> target,vector<int> permutatemap)
 {
-    static int Result[56];
+    static vector<int> Result;
 
-    for(int i=0;i<56;i++)
+    for(int i=0;i<permutatemap.size();i++)
     {
-        Result[i]=target[permutatemap[i]];
+        Result.push_back(target[permutatemap[i]]);
     }
 
     return Result;
