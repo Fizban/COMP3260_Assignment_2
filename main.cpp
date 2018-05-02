@@ -1,4 +1,5 @@
 #include <iostream>
+#include <algorithm>
 #include <vector>
 
 
@@ -56,7 +57,7 @@ vector<int> Permutatekey(vector<int> target,vector<int> permutatemap);
 
 void PrintArray(vector<int> target);
 
-
+vector<int> LeftShift(vector<int> target,int Shiftcount);
 
 
 /* ==========================================================================================================
@@ -116,7 +117,7 @@ int main() {
     14,6 ,61,53,45,37,29,
     21,13,5 ,28,20,12,4 ,
     };
-    //Permutate the ket using function
+    //Permutate the key using function
 
     vector<int> PermKey = Permutatekey(Key,KeyPerm);
 
@@ -124,6 +125,30 @@ int main() {
     PrintArray(Key);
     cout<<"Permutate Key;"<<endl;
     PrintArray(PermKey);
+
+    vector<int> LeftPermKey = GetLeftSplit(PermKey);
+    vector<int> RightPermKey = GetRightSplit(PermKey);
+    cout<<"Left Half of permutated Key:"<<endl;
+    PrintArray(LeftPermKey);
+    cout<<"Right Half of permutated Key:"<<endl;
+    PrintArray(RightPermKey);
+
+    int shiftcount[16]={1,1,2,2,2,2,2,2,1,2,2,2,2,2,2,1};
+    vector<int> LeftPermKeyShift[16];
+    vector<int> RightPermKeyShift[16];
+    for(int i=0;i<16;i++)
+    {
+        LeftPermKeyShift[i]=LeftShift(LeftPermKey,i+shiftcount[i]);
+        RightPermKeyShift[i]=LeftShift(RightPermKey,i+shiftcount[i]);
+        cout<<"Shift#"<<i<<" forcount"<<shiftcount[i]<<": ";
+        cout<<endl;
+        cout<<"LeftKey:";
+        PrintArray(LeftPermKeyShift[i]);
+        cout<<"RightKey:";
+        PrintArray(RightPermKeyShift[i]);
+        cout<<endl;
+
+    }
 
 
     //Initialising the Inital table to swap bits with the PlainText Bit-stream
@@ -231,8 +256,10 @@ int main() {
 vector<int> GetLeftSplit(vector<int> target)
 {
   //Initialize the array to be returned
+    unsigned int size = (target.size())/2;
   static vector<int> LeftVec;
-  for(unsigned int i=0;i<target.size()/2;i++)
+  LeftVec.clear();
+  for(unsigned int i=0;i<size;i++)
   {
       LeftVec.push_back(target[i]);
   }
@@ -242,9 +269,11 @@ vector<int> GetLeftSplit(vector<int> target)
 
 vector<int> GetRightSplit(vector<int> target)
 {
+    unsigned int size = target.size();
     static vector<int> RightVec;
+    RightVec.clear();
     int j=0;
-    for(unsigned int i=target.size()/2;i<64;i++)
+    for(unsigned int i=size/2;i<size;i++)
     {
         RightVec.push_back(target[i]);
         j++;
@@ -255,8 +284,9 @@ vector<int> GetRightSplit(vector<int> target)
 
 void PrintArray(vector<int> target)
 {
+    unsigned int size = target.size();
     //Step through the array until specified "size" is reached
-    for(unsigned int i=0;i<target.size();i++)
+    for(unsigned int i=0;i<size;i++)
     {
         //Just using this if else to make output look neat. Adds comma to end of each element unless its the last element, where it will add new line.
         if(i!=target.size()-1)
@@ -276,11 +306,17 @@ void PrintArray(vector<int> target)
 vector<int> Permutatekey(vector<int> target,vector<int> permutatemap)
 {
     static vector<int> Result;
-
+    Result.clear();
     for(int i=0;i<permutatemap.size();i++)
     {
         Result.push_back(target[permutatemap[i]]);
     }
 
     return Result;
+}
+
+vector<int> LeftShift(vector<int> target,int Shiftcount)
+{
+    rotate(target.begin(),target.begin()+Shiftcount,target.end());
+    return target;
 }
