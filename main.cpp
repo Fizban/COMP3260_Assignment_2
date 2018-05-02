@@ -49,7 +49,67 @@ using namespace std;
  * ----------------------------------------------------------------------------------------------------------
  * ==========================================================================================================*/
 
-
+/*-----------------------------------------------------------------------------------------------------------
+ * Name:GetLeftSplit(vector<int> target)
+ * ----------------------------------------------------------------------------------------------------------
+ * Inital Conditions:
+ * Needs a target vector
+ *
+ * Exit Conditions:
+ * Returns the 1st half of the target vector
+ *
+ * Description:
+ * Takes the target vector and creates another vector that copies targets values up until targets max size
+ * /2, effectively copying the 1st half of the vector
+ * ----------------------------------------------------------------------------------------------------------
+ *
+ * ----------------------------------------------------------------------------------------------------------
+ * Name:GetRightSplit(vector<int> target)
+ * ----------------------------------------------------------------------------------------------------------
+ * Inital Conditions:
+ * Needs a target vector
+ *
+ * Exit Conditions:
+ * Returns the 2nd half of the target vector
+ *
+ * Description:
+ * Takes the target vector and creates another vector that copies targets values starting at vec.size/2 until
+ * vec.size, taking the second half od the vector
+ * ----------------------------------------------------------------------------------------------------------
+ *
+ *
+ * ----------------------------------------------------------------------------------------------------------
+ * Name:Permutatekey(vector<int> target)
+ * ----------------------------------------------------------------------------------------------------------
+ * Inital Conditions:
+ * Needs a target vector and a schema to permutate it off in the form of a vector
+ *
+ * Exit Conditions:
+ * Returns the target vector permutated to the map
+ *
+ * Description:
+ * Takes the target vector and switches all the bits around depending on the 'map'. For example for an input
+ * of 1,1,1,0,1,1,0,1 using map 8,5,4,3,2,6,7,1 resulting permutation will be 1,1,0,1,1,1,0,1
+ *    1,2,3,4,5,6,7,8                                                         1,2,3,4,5,6,7,8
+ * ----------------------------------------------------------------------------------------------------------
+ *
+ * ----------------------------------------------------------------------------------------------------------
+ * Name:PrintArray(vector<int> target)
+ * ----------------------------------------------------------------------------------------------------------
+ * Inital Conditions:
+ * Needs a target vector
+ *
+ * Exit Conditions:
+ * Prints the entire contents of an vector
+ *
+ * Description:
+ * takes a vector and checks each value then prints it out in chronological order
+ * ----------------------------------------------------------------------------------------------------------
+ *
+ *
+ *
+ *
+ */
 vector<int> GetLeftSplit(vector<int> target);
 vector<int> GetRightSplit(vector<int> target);
 
@@ -118,14 +178,14 @@ int main() {
     21,13,5 ,28,20,12,4 ,
     };
     //Permutate the key using function
-
     vector<int> PermKey = Permutatekey(Key,KeyPerm);
-
+    //Printing keys
     cout<<"Inital Key:"<<endl;
     PrintArray(Key);
     cout<<"Permutate Key;"<<endl;
     PrintArray(PermKey);
 
+    //Split the permutated key into left and right halves
     vector<int> LeftPermKey = GetLeftSplit(PermKey);
     vector<int> RightPermKey = GetRightSplit(PermKey);
     cout<<"Left Half of permutated Key:"<<endl;
@@ -133,13 +193,31 @@ int main() {
     cout<<"Right Half of permutated Key:"<<endl;
     PrintArray(RightPermKey);
 
+    //Set an array for the shift counts
+    //eg for 11010 shift of 1 will result in "10101" and shift of 2 will result in "01011"
     int shiftcount[16]={1,1,2,2,2,2,2,2,1,2,2,2,2,2,2,1};
+    //Define vectors to hold these shifts
     vector<int> LeftPermKeyShift[16];
     vector<int> RightPermKeyShift[16];
+
+    int shiftcounter=0;
+    //Loop 16 times to generate 32 subkeys in total 16 of each half of the permutated key.
     for(int i=0;i<16;i++)
     {
-        LeftPermKeyShift[i]=LeftShift(LeftPermKey,i+shiftcount[i]);
-        RightPermKeyShift[i]=LeftShift(RightPermKey,i+shiftcount[i]);
+        //For the first round we need to use the values of "LeftKeyPerm" and "RightKeyPerm"
+        if(i==0)
+        {
+            LeftPermKeyShift[i]=LeftShift(LeftPermKey,shiftcount[i]);
+            RightPermKeyShift[i]=LeftShift(RightPermKey,shiftcount[i]);
+        }
+        //Once the 1st round has been completed we can use the previously shifted vector (PermKeyShift[i-1])
+        //Each iteration checking shiftcount[i] to control the amount of shifts per round
+        if(i>0)
+        {
+            LeftPermKeyShift[i]=LeftShift(LeftPermKeyShift[i-1],shiftcount[i]);
+            RightPermKeyShift[i]=LeftShift(RightPermKeyShift[i-1],shiftcount[i]);
+        }
+        //Print out values for testing purposes
         cout<<"Shift#"<<i<<" forcount"<<shiftcount[i]<<": ";
         cout<<endl;
         cout<<"LeftKey:";
@@ -147,7 +225,6 @@ int main() {
         cout<<"RightKey:";
         PrintArray(RightPermKeyShift[i]);
         cout<<endl;
-
     }
 
 
@@ -305,10 +382,13 @@ void PrintArray(vector<int> target)
 
 vector<int> Permutatekey(vector<int> target,vector<int> permutatemap)
 {
+    //Define the vector to store the permutation
     static vector<int> Result;
+    //Clear the vector because for some reason re-declaring it does not clear its previous values
     Result.clear();
     for(int i=0;i<permutatemap.size();i++)
     {
+        //Each iteration push the item from the permutation map to the vector
         Result.push_back(target[permutatemap[i]]);
     }
 
@@ -317,6 +397,12 @@ vector<int> Permutatekey(vector<int> target,vector<int> permutatemap)
 
 vector<int> LeftShift(vector<int> target,int Shiftcount)
 {
+    //using std::algrithms inbuilt function to left shift the vectors
+    //rotate(start,middle,end) where
+    //start defines the start of the area to be rotated(in this case we need the whole array).
+    //middle defines what will become the new start (we have used start+shiftcount as in some cases we need the rotation to start at the second bit).
+    //end much like start defines the end of the area to be rotated.
     rotate(target.begin(),target.begin()+Shiftcount,target.end());
+    //return the rotated vector
     return target;
 }
