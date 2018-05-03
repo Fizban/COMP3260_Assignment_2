@@ -119,6 +119,8 @@ void PrintArray(vector<int> target);
 
 vector<int> LeftShift(vector<int> target,int Shiftcount);
 
+vector<int> ConcatenateVectors(vector<int> firsthalf,vector<int> secondhalf);
+
 
 /* ==========================================================================================================
  * ----------------------------------------------------------------------------------------------------------
@@ -168,15 +170,29 @@ int main() {
     //Initializing the array for which Keys will be permutated
     vector<int> KeyPerm
     {
-    57,49,41,33,25,17,9 ,
-    1 ,58,50,42,34,26,18,
-    10,2 ,59,51,43,35,27,
-    19,11,3 ,60,52,44,36,
-    63,55,47,39,31,23,15,
-    7 ,62,54,46,38,30,22,
-    14,6 ,61,53,45,37,29,
-    21,13,5 ,28,20,12,4 ,
+        57,49,41,33,25,17,9 ,
+        1 ,58,50,42,34,26,18,
+        10,2 ,59,51,43,35,27,
+        19,11,3 ,60,52,44,36,
+        63,55,47,39,31,23,15,
+        7 ,62,54,46,38,30,22,
+        14,6 ,61,53,45,37,29,
+        21,13,5 ,28,20,12,4 ,
     };
+
+    vector<int> KeyPerm2
+            {
+
+        14,    17,   11,    24,     1,    5,
+         3,    28,   15,     6,    21,   10,
+        23,    19,   12,     4,    26,    8,
+        16,     7,   27,    20,    13,    2,
+        41,    52,   31,    37,    47,   55,
+        30,    40,   51,    45,    33,   48,
+        44,    49,   39,    56,    34,   53,
+        46,    42,   50,    36,    29,   32,
+            };
+
     //Permutate the key using function
     vector<int> PermKey = Permutatekey(Key,KeyPerm);
     //Printing keys
@@ -199,6 +215,9 @@ int main() {
     //Define vectors to hold these shifts
     vector<int> LeftPermKeyShift[16];
     vector<int> RightPermKeyShift[16];
+
+    vector<int> Prepermutatedkeys[16];
+    vector<int> FinalKeys[16];
 
     int shiftcounter=0;
     //Loop 16 times to generate 32 subkeys in total 16 of each half of the permutated key.
@@ -225,9 +244,23 @@ int main() {
         cout<<"RightKey:";
         PrintArray(RightPermKeyShift[i]);
         cout<<endl;
+        Prepermutatedkeys[i]=ConcatenateVectors(LeftPermKeyShift[i],RightPermKeyShift[i]);
+        cout<<"Prepermutateded concatenation:";
+        PrintArray(Prepermutatedkeys[i]);
+
+        FinalKeys[i]=Permutatekey(Prepermutatedkeys[i],KeyPerm2);
     }
 
 
+    cout<<"Final Keys"<<endl;
+    cout<<"--------------------------------------------------------"<<endl;
+    for(int i=0;i<16;i++)
+    {
+        cout<<"Key["<<i<<"]:";
+        PrintArray(FinalKeys[i]);
+
+    }
+    cout<<"--------------------------------------------------------"<<endl;
     //Initialising the Inital table to swap bits with the PlainText Bit-stream
     int InitalPerm[64] =
     {
@@ -405,4 +438,17 @@ vector<int> LeftShift(vector<int> target,int Shiftcount)
     rotate(target.begin(),target.begin()+Shiftcount,target.end());
     //return the rotated vector
     return target;
+}
+
+vector<int> ConcatenateVectors(vector<int> firsthalf,vector<int> secondhalf)
+{
+
+    for(int i=0;i<secondhalf.size();i++)
+    {
+        firsthalf.push_back(secondhalf[i]);
+    }
+
+
+
+    return firsthalf;
 }
