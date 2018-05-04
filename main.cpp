@@ -157,8 +157,6 @@ int main() {
             };
 
 
-
-
     //Initializing the array for which Keys will be permutated
     vector<int> KeyPerm
     {
@@ -235,8 +233,9 @@ int main() {
         PrintArray(LeftPermKeyShift[i]);
         cout<<"RightKey:";
         PrintArray(RightPermKeyShift[i]);
-        cout<<endl;
+        //Concatenate the left and right halves before the are permutated and readly to XOR with plaintext
         Prepermutatedkeys[i]=ConcatenateVectors(LeftPermKeyShift[i],RightPermKeyShift[i]);
+        //Print these values for testing.
         cout<<"Prepermutateded concatenation:";
         PrintArray(Prepermutatedkeys[i]);
 
@@ -281,7 +280,18 @@ int main() {
     cout<<"Right split of plaintext:"<<endl;
     PrintArray(PlainR);
 
-
+    //Initalizing the E-Table to expand the right block of the plaintext.
+    vector<int> ETable
+            {
+            32,    1 ,   2 ,    3 ,    4 ,   5 ,
+            4 ,    5 ,   6 ,    7 ,    8 ,   9 ,
+            8 ,    9 ,   10,    11,    12,   13,
+            12,    13,   14,    15,    16,   17,
+            16,    17,   18,    19,    20,   21,
+            20,    21,   22,    23,    24,   25,
+            24,    25,   26,    27,    28,   29,
+            28,    29,   30,    31,    32,    1,
+            };
 
 
 
@@ -411,7 +421,14 @@ void PrintArray(vector<int> target)
         //Just using this if else to make output look neat. Adds comma to end of each element unless its the last element, where it will add new line.
         if(i!=target.size()-1)
         {
-            cout<<target[i]<<", ";
+            if((i-3)%4==0 && i>0)
+            {
+            cout<<target[i]<<" ";
+            }
+            else
+            {
+            cout<<target[i];
+            }
         }
         else
         {
