@@ -156,14 +156,6 @@ int main() {
                     1,1,0,1,1,1,1,1
             };
 
-    //Left and right splits on the plaintext
-    //Left takes the 1st 32 bits, and right the last 32.
-    vector<int> PlainL = GetLeftSplit(plaintext);
-    vector<int> PlainR = GetRightSplit(plaintext);
-    cout<<"Left split of plaintext:"<<endl;
-    PrintArray(PlainL);
-    cout<<"Right split of plaintext:"<<endl;
-    PrintArray(PlainR);
 
 
 
@@ -262,7 +254,7 @@ int main() {
     }
     cout<<"--------------------------------------------------------"<<endl;
     //Initialising the Inital table to swap bits with the PlainText Bit-stream
-    int InitalPerm[64] =
+    vector<int> InitalPerm =
     {
         58,    50,   42,    34,    26,   18,    10,    2,
         60,    52,   44,    36,    28,   20,    12,    4,
@@ -273,6 +265,25 @@ int main() {
         61,    53,   45,    37,    29,   21,    13,    5,
         63,    55,   47,    39,    31,   23,    15,    7,
     };
+    cout<<endl<<"Plaintext:"<<endl;
+    PrintArray(plaintext);
+
+    vector<int> PermutatedMessage = Permutatekey(plaintext,InitalPerm);
+    cout<<endl<<"Permuted Plaintext:"<<endl;
+    PrintArray(PermutatedMessage);
+
+    //Left and right splits on the plaintext
+    //Left takes the 1st 32 bits, and right the last 32.
+    vector<int> PlainL = GetLeftSplit(PermutatedMessage);
+    vector<int> PlainR = GetRightSplit(PermutatedMessage);
+    cout<<endl<<"Left split of plaintext:"<<endl;
+    PrintArray(PlainL);
+    cout<<"Right split of plaintext:"<<endl;
+    PrintArray(PlainR);
+
+
+
+
 
     //Initialising the Final table to swap bits with the PlainText Bit-stream
     int InversePerm[64] =
@@ -350,7 +361,6 @@ int main() {
     //string argument;
     //cin >> argument;
     //cout << argument << std::endl;
-    cout << sbox_array[0][0][0];
     return 0;
     // This is a test
     //Test part 2 1
