@@ -293,12 +293,14 @@ int main() {
 
     //Left and right splits on the plaintext
     //Left takes the 1st 32 bits, and right the last 32.
-    vector<int> PlainL = GetLeftSplit(PermutatedMessage);
-    vector<int> PlainR = GetRightSplit(PermutatedMessage);
+    vector<int> PlainL[16];
+    vector<int> PlainR[16];
+    PlainL[0] = GetLeftSplit(PermutatedMessage);
+    PlainR[0] = GetRightSplit(PermutatedMessage);
     cout<<endl<<"Left split of plaintext:"<<endl;
-    PrintArray(PlainL);
+    PrintArray(PlainL[0]);
     cout<<"Right split of plaintext:"<<endl;
-    PrintArray(PlainR);
+    PrintArray(PlainR[0]);
     //Holds values for the left and right plaintext swap
     vector<int> Temppt;
     for(int j=0;j<16;j++)
@@ -309,11 +311,11 @@ int main() {
         //Empties temppt incase of lingering values.
         Temppt.clear();
         //Pass the right half of plaintext and the 1st of the generated subkeys into round function.
-        Temppt = RoundFunction(PlainR, FinalKeys[j]);
+        Temppt = RoundFunction(PlainR[j], FinalKeys[j]);
         //Swaps values of left Plaintext onto right plaintext
-        PlainR = swapvectors(PlainL,PlainR);
+        PlainR[j+1] = XOR(PlainL[j],Temppt);
         //Swaps values of Rounded right plaintext onto left Plaintext.
-        PlainL = swapvectors(Temppt,PlainL);
+        PlainL[j+1] = PlainR[j];
     }
 
 
@@ -330,12 +332,12 @@ int main() {
             33,     1,   41,     9,    49,   17,    57,   25,
     };
     cout<<"Final Left:"<<endl;
-    PrintArray(PlainL);
+    PrintArray(PlainL[16]);
     cout<<"Final Right:"<<endl;
-    PrintArray(PlainR);
+    PrintArray(PlainR[16]);
     cout<<"Concatenated:"<<endl;
-    PrintArray(ConcatenateVectors(PlainR,PlainL));
-    vector<int> FinalPT =  Permutatekey(ConcatenateVectors(PlainR,PlainL),InversePerm);
+    PrintArray(ConcatenateVectors(PlainR[16],PlainL[16]));
+    vector<int> FinalPT =  Permutatekey(ConcatenateVectors(PlainR[16],PlainL[16]),InversePerm);
 
     cout<<"Permutated for Final Encypted String (Size "<< FinalPT.size()<< "bits):"<<endl;
     PrintArray(FinalPT);
@@ -475,11 +477,14 @@ vector<int> XOR(vector<int> Plaintext,vector<int> Key)
 
 vector<int> RoundFunction(vector<int> Plaintext,vector<int> Key)
 {
+
     cout<<endl<<"Pre Expanded right half of plaintext"<<endl;
     PrintArray(Plaintext);
+    vector<int> Result;
     vector<int> expandedpt;
     vector<int> expandedXORpt;
     vector<int> expandedXORsubbedpt;
+    Result.clear();
     expandedpt.clear();
     expandedXORpt.clear();
     expandedXORsubbedpt.clear();
@@ -506,15 +511,26 @@ vector<int> RoundFunction(vector<int> Plaintext,vector<int> Key)
     expandedXORsubbedpt = Sbox(expandedXORpt);
     cout<<endl<<"Post S-Boxed right half of plaintext"<<endl;
     PrintArray(expandedXORsubbedpt);
+    vector<int> postsubperm
+            {
+                16,   7,  20,  21,
+                29,  12,  28,  17,
+                1 ,  15,  23,  26,
+                5 ,  18,  31,  10,
+                2 ,  8 ,  24,  14,
+                32,  27,   3,   9,
+                19,  13,  30,   6,
+                22,  11,   4,  25,
+            };
+    Result=Permutatekey(expandedXORsubbedpt,postsubperm);
+    cout<<endl<<"Final Result of the round(size "<<Result.size()<<"):"<<endl;
+    PrintArray(Result);
 
 
 
 
 
-
-
-
-    return expandedXORsubbedpt;
+    return Result;
 }
 
 
