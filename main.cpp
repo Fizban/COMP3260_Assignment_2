@@ -301,15 +301,15 @@ int main() {
     PrintArray(PlainR);
     //Holds values for the left and right plaintext swap
     vector<int> Temppt;
-    for(int i=0;i<16;i++)
+    for(int j=0;j<16;j++)
     {
         cout<<"================================================================================"<<endl;
-        cout<<"==============================Round Funct #"<<i<<"===================================="<<endl;
+        cout<<"==============================Round Funct #"<<j<<"===================================="<<endl;
         cout<<"================================================================================"<<endl;
         //Empties temppt incase of lingering values.
         Temppt.clear();
         //Pass the right half of plaintext and the 1st of the generated subkeys into round function.
-        Temppt = RoundFunction(PlainR, FinalKeys[i]);
+        Temppt = RoundFunction(PlainR, FinalKeys[j]);
         //Swaps values of left Plaintext onto right plaintext
         PlainR = swapvectors(PlainL,PlainR);
         //Swaps values of Rounded right plaintext onto left Plaintext.
@@ -318,7 +318,7 @@ int main() {
 
 
     //Initialising the Final table to swap bits with the PlainText Bit-stream
-    int InversePerm[64] =
+    vector<int> InversePerm=
     {
             40,     8,   48,    16,    56,   24,    64,   32,
             39,     7,   47,    15,    55,   23,    63,   31,
@@ -329,6 +329,17 @@ int main() {
             34,     2,   42,    10,    50,   18,    58,   26,
             33,     1,   41,     9,    49,   17,    57,   25,
     };
+    cout<<"Final Left:"<<endl;
+    PrintArray(PlainL);
+    cout<<"Final Right:"<<endl;
+    PrintArray(PlainR);
+    cout<<"Concatenated:"<<endl;
+    PrintArray(ConcatenateVectors(PlainR,PlainL));
+    vector<int> FinalPT =  Permutatekey(ConcatenateVectors(PlainR,PlainL),InversePerm);
+
+    cout<<"Permutated for Final Encypted String (Size "<< FinalPT.size()<< "bits):"<<endl;
+    PrintArray(FinalPT);
+
 
 
     return 0;
@@ -419,12 +430,17 @@ vector<int> Permutatekey(vector<int> target,vector<int> permutatemap)
 {
     //Define the vector to store the permutation
     static vector<int> Result;
+    int a,b,c,d = 0;
     //Clear the vector because for some reason re-declaring it does not clear its previous values
     Result.clear();
     for(int i=0;i<permutatemap.size();i++)
     {
+        a=target[i];
+        b=permutatemap[i];
+        c=target[permutatemap[i]];
         //Each iteration push the item from the permutation map to the vector
-        Result.push_back(target[permutatemap[i]]);
+        Result.push_back(target[permutatemap[i]-1]);
+        d=Result[i];
     }
 
     return Result;
@@ -464,6 +480,9 @@ vector<int> RoundFunction(vector<int> Plaintext,vector<int> Key)
     vector<int> expandedpt;
     vector<int> expandedXORpt;
     vector<int> expandedXORsubbedpt;
+    expandedpt.clear();
+    expandedXORpt.clear();
+    expandedXORsubbedpt.clear();
     //Initalizing the E-Table to expand the right block of the plaintext.
     vector<int> ETable
             {
@@ -487,6 +506,7 @@ vector<int> RoundFunction(vector<int> Plaintext,vector<int> Key)
     expandedXORsubbedpt = Sbox(expandedXORpt);
     cout<<endl<<"Post S-Boxed right half of plaintext"<<endl;
     PrintArray(expandedXORsubbedpt);
+
 
 
 
