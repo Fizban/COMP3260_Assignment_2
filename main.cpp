@@ -108,6 +108,58 @@ using namespace std;
  * takes a vector and checks each value then prints it out in chronological order
  * ----------------------------------------------------------------------------------------------------------
  *
+ * ----------------------------------------------------------------------------------------------------------
+ * Name:SBox(vector<int> target)
+ * ----------------------------------------------------------------------------------------------------------
+ * Initial Conditions:
+ * Needs a target vector
+ *
+ * Exit Conditions:
+ * Returns the target vector mapped to the substitution box table
+ *
+ * Description:
+ * Takes a vector, extracts the row and column from the input and maps to a output in the substitution box table
+ * ----------------------------------------------------------------------------------------------------------
+ *
+ * ----------------------------------------------------------------------------------------------------------
+ * Name:slice(const vector<int>& v, int start, int end);
+ * ----------------------------------------------------------------------------------------------------------
+ * Initial Conditions:
+ * Needs a target vector, needs given start and end points
+ *
+ * Exit Conditions:
+ * Returns the 'slice' of a vector given within start and end points
+ *
+ * Description:
+ * Slices a vector within given start and end points
+ * ----------------------------------------------------------------------------------------------------------
+ *
+ * ----------------------------------------------------------------------------------------------------------
+ * Name: binary_to_int(vector<int> target)
+ * ----------------------------------------------------------------------------------------------------------
+ * Initial Conditions:
+ * Needs a target vector
+ *
+ * Exit Conditions:
+ * Returns the target vector converted to an integer
+ *
+ * Description:
+ * Takes a vector and converts the binary equivalent to an integer
+ * ----------------------------------------------------------------------------------------------------------
+ *
+ * ----------------------------------------------------------------------------------------------------------
+ * Name: int_to_binary(int number)
+ * ----------------------------------------------------------------------------------------------------------
+ * Initial Conditions:
+ * Needs a given integer
+ *
+ * Exit Conditions:
+ * Returns the target vector converted to binary equivalent
+ *
+ * Description:
+ * Takes a vector and converts the integer to a binary equivalent vector
+ * ----------------------------------------------------------------------------------------------------------
+ *
  *
  *
  *
@@ -559,11 +611,15 @@ vector<int> ConcatenateVectors(vector<int> firsthalf,vector<int> secondhalf)
 
 vector<int> Sbox(vector<int> target)
 {
+    //Define the vector to store the substitution result
     vector<int> Result;
+
+    //Loop for eight rounds of substitution
     for(int i = 0;i<8;i++)
     {
         cout<<"----------------ROUND "<<i<<" of S Box-----------------"<<endl;
 
+        //Substitution array given in standard
         int sbox_array[8][4][16]=
                 {   {
                             14,4 ,13,1 ,2 ,15,11,8 ,3 ,10,6 ,12,5 ,9 ,0 ,7,
@@ -614,40 +670,51 @@ vector<int> Sbox(vector<int> target)
                             2,1,14,7,4,10,8,13,15,12,9,0,3,5,6,11
                     }
                 };
-        //vector<int> test = target(target.begin(),target.begin()+6);
+
+        // Take only 6 bits of given input
         vector<int> test = slice(target,(i*6),((i+1)*6));
         cout << "\nBefore Sub :";
         PrintArray(test);
 
+        //Extract row number from only first bit and last bit of input
         vector<int> row = {test.front(),test.back()};
         cout << "\nRow Binary :";
         PrintArray(row);
 
+        //Convert binary to integer for interoperability
         int rownum = binary_to_int(row);
         cout << "\nRow Integer :";
         cout << rownum;
 
+        //Extract column number from 'inner' four bits of input
         vector<int> col = slice(test,1,5);
         cout << "\nColumn Binary :";
         PrintArray(col);
 
+        //Convert binary to integer for interoperability
         int colnum = binary_to_int(col);
         cout << "\nColumn Integer :";
         cout << colnum;
 
+
+        // Determine substitute
         int found = sbox_array[i][rownum][colnum];
         cout<<"\nNumber found at r:"<<rownum<<" c:"<<colnum<<" Is ==";
         cout << found;
 
+        //Convert integer to binary for interoperability
         vector<int> actual = int_to_binary(found);
         cout<<"\nBinary equivalent found at r:"<<rownum<<" c:"<<colnum<<" Is ==";
         PrintArray(actual);
 
+        //Store result in vector to return
         unsigned int size = actual.size();
         for(int i=0;i<size;i++)
         {
             Result.push_back(actual[i]);
         }
+
+        //Print and clean up
         cout<<"\nResult so far:\n";
         PrintArray(Result);
         actual.clear();
@@ -659,9 +726,11 @@ vector<int> Sbox(vector<int> target)
 
 vector<int> slice(const vector<int>& v, int start=0, int end=-1)
 {
+    //Initialise size for pre-sliced array
     int oldlen = v.size();
     int newlen;
 
+    //Error catching for invalid inputs
     if (end == -1 or end >= oldlen)
     {
         newlen = oldlen-start;
@@ -671,8 +740,10 @@ vector<int> slice(const vector<int>& v, int start=0, int end=-1)
         newlen = end-start;
     }
 
+    //Declare vector to be returned
     vector<int> nv(newlen);
 
+    //Fill new vector with only values between given input points
     for (int i=0; i<newlen; i++)
     {
         nv[i] = v[start+i];
@@ -682,6 +753,7 @@ vector<int> slice(const vector<int>& v, int start=0, int end=-1)
 
 int binary_to_int(vector<int> input)
 {
+    //Convert binary to integer and return results
     int result = 0;
     for (auto d : input)
     {
@@ -692,15 +764,19 @@ int binary_to_int(vector<int> input)
 
 vector<int> int_to_binary(int number)
 {
+    //Convert integer to binary vector equivalent
     vector<int> binary;
     binary.clear();
     int i;
+    //Iterate through multiples of 2 to determine binary equivalent
     while (number > 0)
     {
         binary.push_back(number%2);
         number /= 2;
         i++;
     }
+
+    //Fill array with zeros if smaller than 4 bits
     if(binary.size()!=4)
     {
         unsigned int pushcount = 4-binary.size();
