@@ -4,6 +4,7 @@ Files included in this project:
 
 	main.cpp
   README.txt
+  static_arrays.h
 
 ------------------------------------------------------------------------------------------------------
 
@@ -17,6 +18,9 @@ Main:
 This class takes input from a file* using a command line parser** and uses the DES algorithm to either
 encrypyt or decrypt plaintext/ciphertext and avalanche analysis in the window. The plaintext/ciphertext
 is then outputted as text.
+
+Static_Arrays.h:
+Contains Substitution box table since it cannot be altered
 
 ------------------------------------------------------------------------------------------------------
 * The input file should be in the format:
