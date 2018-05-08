@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 #include "static_arrays.h"
-
+//731
 
 using namespace std;
 /* https://github.com/Fizban/COMP3260_Assignment_2/commits/master
@@ -15,35 +15,6 @@ using namespace std;
  * 5.S-Box
  * 6.Permutate
  * 7.Avalanche Analysis
- *
- *
- * Initial Permutation:
-
-            58    50   42    34    26   18    10    2
-            60    52   44    36    28   20    12    4
-            62    54   46    38    30   22    14    6
-            64    56   48    40    32   24    16    8
-            57    49   41    33    25   17     9    1
-            59    51   43    35    27   19    11    3
-            61    53   45    37    29   21    13    5
-            63    55   47    39    31   23    15    7
- *
- *
- *
- * Inverse Permutation:
- *
- *                              IP-1
-
-            40     8   48    16    56   24    64   32
-            39     7   47    15    55   23    63   31
-            38     6   46    14    54   22    62   30
-            37     5   45    13    53   21    61   29
-            36     4   44    12    52   20    60   28
-            35     3   43    11    51   19    59   27
-            34     2   42    10    50   18    58   26
-            33     1   41     9    49   17    57   25
- *
- *
  */
 
 /* ==========================================================================================================
@@ -165,13 +136,15 @@ using namespace std;
  *
  *
  */
-vector<int> ReadFile(string line);
-
+vector<int> ReadFile(string filename);
+void writetofile(vector<int> target,vector<int> target2,vector<int> target3,string filename);
+vector<int> StringtoBitStream(string line);
 vector<int> GetLeftSplit(vector<int> target);
 vector<int> GetRightSplit(vector<int> target);
 
 vector<int> Permutatekey(vector<int> target,vector<int> permutatemap);
-vector<int> swapvectors(vector<int> V1,vector<int> V2);
+
+
 vector<int> XOR(vector<int> Plaintext,vector<int> Key);
 
 vector<int> RoundFunction(vector<int> Plaintext,vector<int> Key);
@@ -188,6 +161,13 @@ vector<int> slice(const vector<int>& v, int start, int end);
 int binary_to_int(vector<int> input);
 vector<int> int_to_binary(int number);
 
+vector<vector<int>> Keygen(vector<int> Key);
+
+vector<int> outerroundfunc(vector<int> plaintext,vector<vector<int>> FinalKeys,int mode);
+
+void Encryption(string filename);
+void Decryption(string filename);
+
 /* ==========================================================================================================
  * ----------------------------------------------------------------------------------------------------------
  * ----------------------------------------------MAIN BODY OF PROGRAM---------------------------------------
@@ -197,203 +177,23 @@ vector<int> int_to_binary(int number);
 
 
 int main() {
-    string yesno="z";
-    vector<int> Key;
-    vector<int> plaintext;
-    string Temp,filename;
-
-
+    int choice;
+    string filename;
     cout<<"Please enter the file name you wish to read from(default 'input'):";
     cin >> filename;
 
-    ifstream input(filename+".txt");
-    if (input.is_open())
+    cout<<"Would you like to encrypt a message or decrypt a cipher?"<<endl;
+    cout<<"( 1 ) Encrypt"<<endl;
+    cout<<"( 2 ) Decrypt"<<endl;
+    cin >> choice;
+    if(choice==1)
     {
-        getline(input,Temp);
-        plaintext = ReadFile(Temp);
-        getline(input,Temp);
-        Key = ReadFile(Temp);
-
-
-       input.close();
+        Encryption(filename);
     }
-    else
+    if(choice==2)
     {
-        cout << "unable to openfile";
+        Decryption(filename);
     }
-
-    cout<<"Inital Key:"<<endl;
-    PrintArray(Key);
-    cout<<"Initial Message:"<<endl;
-    PrintArray(plaintext);
-
-
-    //Initializing the array for which Keys will be permutated
-    vector<int> KeyPerm
-    {
-        57,49,41,33,25,17,9 ,
-        1 ,58,50,42,34,26,18,
-        10,2 ,59,51,43,35,27,
-        19,11,3 ,60,52,44,36,
-        63,55,47,39,31,23,15,
-        7 ,62,54,46,38,30,22,
-        14,6 ,61,53,45,37,29,
-        21,13,5 ,28,20,12,4 ,
-    };
-
-    vector<int> KeyPerm2
-    {
-
-        14,17,11,24,1 ,5 ,
-         3,28,15,6 ,21,10,
-        23,19,12,4, 26, 8,
-        16,7 ,27,20,13, 2,
-        41,52,31,37,47,55,
-        30,40,51,45,33,48,
-        44,49,39,56,34,53,
-        46,42,50,36,29,32,
-    };
-
-    //Permutate the key using function
-    vector<int> PermKey = Permutatekey(Key,KeyPerm);
-    //Printing keys
-    cout<<"Inital Key:"<<endl;
-    PrintArray(Key);
-    cout<<"Permutate Key;"<<endl;
-    PrintArray(PermKey);
-
-    //Split the permutated key into left and right halves
-    vector<int> LeftPermKey = GetLeftSplit(PermKey);
-    vector<int> RightPermKey = GetRightSplit(PermKey);
-    cout<<"Left Half of permutated Key:"<<endl;
-    PrintArray(LeftPermKey);
-    cout<<"Right Half of permutated Key:"<<endl;
-    PrintArray(RightPermKey);
-
-    //Set an array for the shift counts
-    //eg for 11010 shift of 1 will result in "10101" and shift of 2 will result in "01011"
-    int shiftcount[16]={1,1,2,2,2,2,2,2,1,2,2,2,2,2,2,1};
-    //Define vectors to hold these shifts
-    vector<int> LeftPermKeyShift[16];
-    vector<int> RightPermKeyShift[16];
-
-    vector<int> Prepermutatedkeys[16];
-    vector<int> FinalKeys[16];
-
-    int shiftcounter=0;
-    //Loop 16 times to generate 32 subkeys in total 16 of each half of the permutated key.
-    for(int i=0;i<16;i++)
-    {
-        //For the first round we need to use the values of "LeftKeyPerm" and "RightKeyPerm"
-        if(i==0)
-        {
-            LeftPermKeyShift[i]=LeftShift(LeftPermKey,shiftcount[i]);
-            RightPermKeyShift[i]=LeftShift(RightPermKey,shiftcount[i]);
-        }
-        //Once the 1st round has been completed we can use the previously shifted vector (PermKeyShift[i-1])
-        //Each iteration checking shiftcount[i] to control the amount of shifts per round
-        if(i>0)
-        {
-            LeftPermKeyShift[i]=LeftShift(LeftPermKeyShift[i-1],shiftcount[i]);
-            RightPermKeyShift[i]=LeftShift(RightPermKeyShift[i-1],shiftcount[i]);
-        }
-        //Print out values for testing purposes
-        cout<<"Shift#"<<i<<" forcount"<<shiftcount[i]<<": ";
-        cout<<endl;
-        cout<<"LeftKey:";
-        PrintArray(LeftPermKeyShift[i]);
-        cout<<"RightKey:";
-        PrintArray(RightPermKeyShift[i]);
-        //Concatenate the left and right halves before the are permutated and readly to XOR with plaintext
-        Prepermutatedkeys[i]=ConcatenateVectors(LeftPermKeyShift[i],RightPermKeyShift[i]);
-        //Print these values for testing.
-        cout<<"Prepermutateded concatenation:";
-        PrintArray(Prepermutatedkeys[i]);
-
-        FinalKeys[i]=Permutatekey(Prepermutatedkeys[i],KeyPerm2);
-    }
-
-
-    cout<<"Final Keys"<<endl;
-    cout<<"--------------------------------------------------------"<<endl;
-    for(int i=0;i<16;i++)
-    {
-        cout<<"Key["<<i<<"]:";
-        PrintArray(FinalKeys[i]);
-
-    }
-    cout<<"--------------------------------------------------------"<<endl;
-    //Initialising the Inital table to swap bits with the PlainText Bit-stream
-    vector<int> InitalPerm =
-    {
-        58,    50,   42,    34,    26,   18,    10,    2,
-        60,    52,   44,    36,    28,   20,    12,    4,
-        62,    54,   46,    38,    30,   22,    14,    6,
-        64,    56,   48,    40,    32,   24,    16,    8,
-        57,    49,   41,    33,    25,   17,     9,    1,
-        59,    51,   43,    35,    27,   19,    11,    3,
-        61,    53,   45,    37,    29,   21,    13,    5,
-        63,    55,   47,    39,    31,   23,    15,    7,
-    };
-
-
-    cout<<endl<<"Plaintext:"<<endl;
-    PrintArray(plaintext);
-
-    vector<int> PermutatedMessage = Permutatekey(plaintext,InitalPerm);
-    cout<<endl<<"Permuted Plaintext:"<<endl;
-    PrintArray(PermutatedMessage);
-
-    //Left and right splits on the plaintext
-    //Left takes the 1st 32 bits, and right the last 32.
-    vector<int> PlainL[16];
-    vector<int> PlainR[16];
-    PlainL[0] = GetLeftSplit(PermutatedMessage);
-    PlainR[0] = GetRightSplit(PermutatedMessage);
-    cout<<endl<<"Left split of plaintext:"<<endl;
-    PrintArray(PlainL[0]);
-    cout<<"Right split of plaintext:"<<endl;
-    PrintArray(PlainR[0]);
-    //Holds values for the left and right plaintext swap
-    vector<int> Temppt;
-    for(int j=0;j<16;j++)
-    {
-        cout<<"================================================================================"<<endl;
-        cout<<"==============================Round Funct #"<<j<<"===================================="<<endl;
-        cout<<"================================================================================"<<endl;
-        //Empties temppt incase of lingering values.
-        Temppt.clear();
-        //Pass the right half of plaintext and the 1st of the generated subkeys into round function.
-        Temppt = RoundFunction(PlainR[j], FinalKeys[j]);
-        //Swaps values of left Plaintext onto right plaintext
-        PlainR[j+1] = XOR(PlainL[j],Temppt);
-        //Swaps values of Rounded right plaintext onto left Plaintext.
-        PlainL[j+1] = PlainR[j];
-    }
-
-
-    //Initialising the Final table to swap bits with the PlainText Bit-stream
-    vector<int> InversePerm=
-    {
-            40,     8,   48,    16,    56,   24,    64,   32,
-            39,     7,   47,    15,    55,   23,    63,   31,
-            38,     6,   46,    14,    54,   22,    62,   30,
-            37,     5,   45,    13,    53,   21,    61,   29,
-            36,     4,   44,    12,    52,   20,    60,   28,
-            35,     3,   43,    11,    51,   19,    59,   27,
-            34,     2,   42,    10,    50,   18,    58,   26,
-            33,     1,   41,     9,    49,   17,    57,   25,
-    };
-    cout<<"Final Left:"<<endl;
-    PrintArray(PlainL[16]);
-    cout<<"Final Right:"<<endl;
-    PrintArray(PlainR[16]);
-    cout<<"Concatenated:"<<endl;
-    PrintArray(ConcatenateVectors(PlainR[16],PlainL[16]));
-    vector<int> FinalPT =  Permutatekey(ConcatenateVectors(PlainR[16],PlainL[16]),InversePerm);
-
-    cout<<"Permutated for Final Encypted String (Size "<< FinalPT.size()<< "bits):"<<endl;
-    PrintArray(FinalPT);
 
 
 
@@ -408,12 +208,62 @@ int main() {
  * ==========================================================================================================*/
 
 
-vector<int> ReadFile(string line)
+vector<int> ReadFile(string filename)
+{
+    string Temp;
+    vector<int> plain;
+    vector<int> key;
+
+    ifstream input(filename+".txt");
+    if (input.is_open())
+    {
+        getline(input,Temp);
+        plain = StringtoBitStream(Temp);
+        getline(input,Temp);
+        key = StringtoBitStream(Temp);
+        plain.insert(plain.end(),key.begin(),key.end());
+        input.close();
+    }
+    else
+    {
+        cout << "unable to openfile";
+        return plain;
+    }
+    return plain;
+}
+
+void writetofile(vector<int> target,vector<int> target2,vector<int> target3,string filename)
+{
+    unsigned long size = target.size();
+    ofstream save;
+    save.open (filename+".txt");
+    for(int i=0;i<size;i++)
+    {
+        save << "Plaintext P:";
+        save << target[i];
+    }
+    save<<endl;
+    for(int i=0;i<size;i++)
+    {
+        save << "Key K:";
+        save << target2[i];
+    }
+    for(int i=0;i<size;i++)
+    {
+        save << "Cipher-text:";
+        save << target3[i];
+    }
+    save.close();
+    return;
+
+}
+
+vector<int> StringtoBitStream(string line)
 {
     int bit;
     string bithold;
     vector<int> Result;
-    int bits = line.length();
+    unsigned long bits = line.length();
     for(int i = 0;i<bits-1;i++)
     {
         bithold = line.substr(0,1);
@@ -485,34 +335,17 @@ vector<int> Permutatekey(vector<int> target,vector<int> permutatemap)
 {
     //Define the vector to store the permutation
     static vector<int> Result;
-    int a,b,c,d = 0;
     //Clear the vector because for some reason re-declaring it does not clear its previous values
     Result.clear();
     for(int i=0;i<permutatemap.size();i++)
     {
-        a=target[i];
-        b=permutatemap[i];
-        c=target[permutatemap[i]];
         //Each iteration push the item from the permutation map to the vector
         Result.push_back(target[permutatemap[i]-1]);
-        d=Result[i];
     }
 
     return Result;
 }
 
-vector<int> swapvectors(vector<int> V1,vector<int> V2)
-{
-    V2.clear();
-    unsigned long size = V1.size();
-    for(unsigned int i=0;i<size;i++)
-    {
-        V2.push_back(V1[i]);
-    }
-
-    return V2;
-
-}
 
 vector<int> XOR(vector<int> Plaintext,vector<int> Key)
 {
@@ -738,3 +571,234 @@ vector<int> int_to_binary(int number)
     reverse(binary.begin(),binary.end());
     return binary;
 }
+
+vector<vector<int>> Keygen(vector<int> Key)
+{
+
+    //Initializing the array for which Keys will be permutated
+    vector<int> KeyPerm
+            {
+                    57,49,41,33,25,17,9 ,
+                    1 ,58,50,42,34,26,18,
+                    10,2 ,59,51,43,35,27,
+                    19,11,3 ,60,52,44,36,
+                    63,55,47,39,31,23,15,
+                    7 ,62,54,46,38,30,22,
+                    14,6 ,61,53,45,37,29,
+                    21,13,5 ,28,20,12,4 ,
+            };
+    //Used in final key permutation
+    vector<int> KeyPerm2
+            {
+
+                    14,17,11,24,1 ,5 ,
+                    3,28,15,6 ,21,10,
+                    23,19,12,4, 26, 8,
+                    16,7 ,27,20,13, 2,
+                    41,52,31,37,47,55,
+                    30,40,51,45,33,48,
+                    44,49,39,56,34,53,
+                    46,42,50,36,29,32,
+            };
+    //Permutate the key using function
+    vector<int> PermKey = Permutatekey(Key,KeyPerm);
+    //Printing keys
+    //cout<<"Inital Key:"<<endl;
+    //PrintArray(Key);
+    //cout<<"Permutate Key;"<<endl;
+    //PrintArray(PermKey);
+
+    //Split the permutated key into left and right halves
+    vector<int> LeftPermKey = GetLeftSplit(PermKey);
+    vector<int> RightPermKey = GetRightSplit(PermKey);
+    //cout<<"Left Half of permutated Key:"<<endl;
+    //PrintArray(LeftPermKey);
+    //cout<<"Right Half of permutated Key:"<<endl;
+    //PrintArray(RightPermKey);
+
+    //Set an array for the shift counts
+    //eg for 11010 shift of 1 will result in "10101" and shift of 2 will result in "01011"
+    int shiftcount[16]={1,1,2,2,2,2,2,2,1,2,2,2,2,2,2,1};
+    //Define vectors to hold these shifts
+    vector<int> LeftPermKeyShift[16];
+    vector<int> RightPermKeyShift[16];
+    vector<int> Prepermutatedkeys[16];
+
+    vector<vector<int>> FinalKeys;
+    //Loop 16 times to generate 32 subkeys in total 16 of each half of the permutated key.
+    for(int i=0;i<16;i++)
+    {
+        //For the first round we need to use the values of "LeftKeyPerm" and "RightKeyPerm"
+        if(i==0)
+        {
+            LeftPermKeyShift[i]=LeftShift(LeftPermKey,shiftcount[i]);
+            RightPermKeyShift[i]=LeftShift(RightPermKey,shiftcount[i]);
+        }
+        //Once the 1st round has been completed we can use the previously shifted vector (PermKeyShift[i-1])
+        //Each iteration checking shiftcount[i] to control the amount of shifts per round
+        if(i>0)
+        {
+            LeftPermKeyShift[i]=LeftShift(LeftPermKeyShift[i-1],shiftcount[i]);
+            RightPermKeyShift[i]=LeftShift(RightPermKeyShift[i-1],shiftcount[i]);
+        }
+        //Print out values for testing purposes
+        cout<<"Shift#"<<i<<" forcount"<<shiftcount[i]<<": ";
+        cout<<endl;
+        cout<<"LeftKey:";
+        PrintArray(LeftPermKeyShift[i]);
+        cout<<"RightKey:";
+        PrintArray(RightPermKeyShift[i]);
+        //Concatenate the left and right halves before the are permutated and readly to XOR with plaintext
+        Prepermutatedkeys[i]=ConcatenateVectors(LeftPermKeyShift[i],RightPermKeyShift[i]);
+        //Print these values for testing.
+        cout<<"Prepermutateded concatenation:";
+        PrintArray(Prepermutatedkeys[i]);
+        FinalKeys.push_back(vector<int>());
+        FinalKeys[i] = Permutatekey(Prepermutatedkeys[i],KeyPerm2);
+    }
+    return FinalKeys;
+
+}
+
+vector<int> outerroundfunc(vector<int> plaintext,vector<vector<int>> FinalKeys, int mode)
+{
+    vector<int> InitalPerm =
+            {
+                    58,    50,   42,    34,    26,   18,    10,    2,
+                    60,    52,   44,    36,    28,   20,    12,    4,
+                    62,    54,   46,    38,    30,   22,    14,    6,
+                    64,    56,   48,    40,    32,   24,    16,    8,
+                    57,    49,   41,    33,    25,   17,     9,    1,
+                    59,    51,   43,    35,    27,   19,    11,    3,
+                    61,    53,   45,    37,    29,   21,    13,    5,
+                    63,    55,   47,    39,    31,   23,    15,    7,
+            };
+
+    cout<<endl<<"Plaintext:"<<endl;
+    PrintArray(plaintext);
+
+    vector<int> PermutatedMessage = Permutatekey(plaintext,InitalPerm);
+    cout<<endl<<"Permuted Plaintext:"<<endl;
+    PrintArray(PermutatedMessage);
+
+//Left and right splits on the plaintext
+//Left takes the 1st 32 bits, and right the last 32.
+    vector<int> PlainL[16];
+    vector<int> PlainR[16];
+    PlainL[0] = GetLeftSplit(PermutatedMessage);
+    PlainR[0] = GetRightSplit(PermutatedMessage);
+    cout<<endl<<"Left split of plaintext:"<<endl;
+    PrintArray(PlainL[0]);
+    cout<<"Right split of plaintext:"<<endl;
+    PrintArray(PlainR[0]);
+//Holds values for the left and right plaintext swap
+    vector<int> Temppt;
+    if(mode==0)
+    {
+        for(int j=0;j<16;j++)
+        {
+            cout<<"================================================================================"<<endl;
+            cout<<"==============================Round Funct #"<<j<<"===================================="<<endl;
+            cout<<"================================================================================"<<endl;
+    //Empties temppt incase of lingering values.
+            Temppt.clear();
+    //Pass the right half of plaintext and the 1st of the generated subkeys into round function.
+            Temppt = RoundFunction(PlainR[j], FinalKeys[j]);
+    //Swaps values of left Plaintext onto right plaintext
+            PlainR[j+1] = XOR(PlainL[j],Temppt);
+    //Swaps values of Rounded right plaintext onto left Plaintext.
+            PlainL[j+1] = PlainR[j];
+        }
+    }
+    if(mode==1)
+    {
+        for(int j=0;j<16;j++)
+        {
+            cout<<"================================================================================"<<endl;
+            cout<<"==============================Round Funct #"<<j<<"===================================="<<endl;
+            cout<<"================================================================================"<<endl;
+            //Empties temppt incase of lingering values.
+            Temppt.clear();
+            //Pass the right half of plaintext and the 1st of the generated subkeys into round function.
+            Temppt = RoundFunction(PlainR[j], FinalKeys[15-j]);
+            //Swaps values of left Plaintext onto right plaintext
+            PlainR[j+1] = XOR(PlainL[j],Temppt);
+            //Swaps values of Rounded right plaintext onto left Plaintext.
+            PlainL[j+1] = PlainR[j];
+        }
+    }
+
+//Initialising the Final table to swap bits with the PlainText Bit-stream
+    vector<int> InversePerm=
+            {
+                    40,     8,   48,    16,    56,   24,    64,   32,
+                    39,     7,   47,    15,    55,   23,    63,   31,
+                    38,     6,   46,    14,    54,   22,    62,   30,
+                    37,     5,   45,    13,    53,   21,    61,   29,
+                    36,     4,   44,    12,    52,   20,    60,   28,
+                    35,     3,   43,    11,    51,   19,    59,   27,
+                    34,     2,   42,    10,    50,   18,    58,   26,
+                    33,     1,   41,     9,    49,   17,    57,   25,
+            };
+    cout<<"Final Left:"<<endl;
+    PrintArray(PlainL[16]);
+    cout<<"Final Right:"<<endl;
+    PrintArray(PlainR[16]);
+    cout<<"Concatenated:"<<endl;
+    PrintArray(ConcatenateVectors(PlainR[16],PlainL[16]));
+    return Permutatekey(ConcatenateVectors(PlainR[16],PlainL[16]),InversePerm);
+}
+
+void Encryption(string filename)
+{
+    vector<int> filedata=ReadFile(filename);
+    vector<int> plaintext = GetLeftSplit(filedata);
+    vector<int> plaintexti = GetLeftSplit(filedata);
+    if(plaintext[0]==1)
+    {
+        plaintexti.at(0) = 0;
+    }
+    else
+    {
+        plaintexti.at(0) = 1;
+    }
+    vector<int> Key = GetRightSplit(filedata);
+    vector<int> Keyi;
+    if(Key[0]==1)
+    {
+        Keyi.at(0) = 0;
+    }
+    else
+    {
+        Keyi.at(0) = 1;
+    }
+    vector<vector<int>> FinalKeys = Keygen(Key);
+
+    vector<int> FinalPT =  outerroundfunc(plaintext,FinalKeys,0);
+
+    cout<<"Permutated for Final Encypted String (Size "<< FinalPT.size()<< "bits):"<<endl;
+    PrintArray(FinalPT);
+
+
+    string savefile;
+    cout<<"Enter the filename to save under:"<<endl;
+    cin>>savefile;
+    writetofile(plaintext,Key,FinalPT,savefile);
+    return;
+
+}
+void Decryption(string filename)
+{
+    vector<int> filedata=ReadFile(filename);
+    vector<int> plaintext = GetLeftSplit(filedata);
+    vector<int> Key = GetRightSplit(filedata);
+    vector<vector<int>> FinalKeys = Keygen(Key);
+    vector<int> FinalPT =  outerroundfunc(plaintext,FinalKeys,1);
+
+    cout<<"Permutated for Final Encypted String (Size "<< FinalPT.size()<< "bits):"<<endl;
+    PrintArray(FinalPT);
+
+}
+
+//
+//0000 0001 0010 0011 0100 0101 0110 0111 1000 1001 1010 1011 1100 1101 1110 1111
