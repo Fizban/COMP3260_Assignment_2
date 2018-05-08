@@ -237,20 +237,21 @@ void writetofile(vector<int> target,vector<int> target2,vector<int> target3,stri
     unsigned long size = target.size();
     ofstream save;
     save.open (filename+".txt");
+    save << "Plaintext P:";
     for(int i=0;i<size;i++)
     {
-        save << "Plaintext P:";
         save << target[i];
     }
-    save<<endl;
+
+    save << "\nKey K      :";
     for(int i=0;i<size;i++)
     {
-        save << "Key K:";
         save << target2[i];
     }
+
+    save << "\nCipher-text:";
     for(int i=0;i<size;i++)
     {
-        save << "Cipher-text:";
         save << target3[i];
     }
     save.close();
@@ -753,27 +754,8 @@ void Encryption(string filename)
 {
     vector<int> filedata=ReadFile(filename);
     vector<int> plaintext = GetLeftSplit(filedata);
-    vector<int> plaintexti = GetLeftSplit(filedata);
-    if(plaintext[0]==1)
-    {
-        plaintexti.at(0) = 0;
-    }
-    else
-    {
-        plaintexti.at(0) = 1;
-    }
     vector<int> Key = GetRightSplit(filedata);
-    vector<int> Keyi;
-    if(Key[0]==1)
-    {
-        Keyi.at(0) = 0;
-    }
-    else
-    {
-        Keyi.at(0) = 1;
-    }
     vector<vector<int>> FinalKeys = Keygen(Key);
-
     vector<int> FinalPT =  outerroundfunc(plaintext,FinalKeys,0);
 
     cout<<"Permutated for Final Encypted String (Size "<< FinalPT.size()<< "bits):"<<endl;
