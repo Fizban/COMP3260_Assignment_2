@@ -136,13 +136,15 @@ using namespace std;
  *
  *
  */
-vector<int> ReadFile(string filename);
+vector<vector<int>> ReadFile(string filename);
 void writetofile(vector<int> target,vector<int> target2,vector<int> target3,string filename);
-vector<int> StringtoBitStream(string line);
+vector<int> StringtoBitStream(string line,int endofstream);
 vector<int> GetLeftSplit(vector<int> target);
 vector<int> GetRightSplit(vector<int> target);
 
 vector<int> Permutatekey(vector<int> target,vector<int> permutatemap);
+
+int Compare(vector<int> target,vector<int> target2);
 
 
 vector<int> XOR(vector<int> Plaintext,vector<int> Key);
@@ -165,9 +167,6 @@ vector<vector<int>> Keygen(vector<int> Key);
 
 vector<int> outerroundfunc(vector<int> plaintext,vector<vector<int>> FinalKeys,int mode);
 
-void Encryption(string filename);
-void Decryption(string filename);
-
 /* ==========================================================================================================
  * ----------------------------------------------------------------------------------------------------------
  * ----------------------------------------------MAIN BODY OF PROGRAM---------------------------------------
@@ -177,24 +176,31 @@ void Decryption(string filename);
 
 
 int main() {
-    int choice;
     string filename;
     cout<<"Please enter the file name you wish to read from(default 'input'):";
     cin >> filename;
 
-    cout<<"Would you like to encrypt a message or decrypt a cipher?"<<endl;
-    cout<<"( 1 ) Encrypt"<<endl;
-    cout<<"( 2 ) Decrypt"<<endl;
-    cin >> choice;
-    if(choice==1)
-    {
-        Encryption(filename);
-    }
-    if(choice==2)
-    {
-        Decryption(filename);
-    }
+    vector<vector<int>> filedata=ReadFile(filename);
+    vector<int> plaintext = filedata[1];
+    vector<int> Key = filedata[2];
+    cout<<"Key\n";
+    PrintArray(Key);
+    vector<vector<int>> FinalKeys = Keygen(Key);
+    vector<int> FinalPT =  outerroundfunc(plaintext,FinalKeys,filedata[0][0]);
 
+    cout<<"Permutated for Final Encypted String (Size "<< FinalPT.size()<< "bits):"<<endl;
+    PrintArray(FinalPT);
+
+    cout<<"Plaintext\n";
+    PrintArray(plaintext);
+    cout<<"Key\n";
+    PrintArray(Key);
+    cout<<"Different bits: "<<Compare(plaintext,Key);
+
+    string savefile;
+    cout<<"Enter the filename to save under:"<<endl;
+    cin>>savefile;
+    writetofile(plaintext,Key,FinalPT,savefile);
 
 
     return 0;
@@ -208,28 +214,32 @@ int main() {
  * ==========================================================================================================*/
 
 
-vector<int> ReadFile(string filename)
+vector<vector<int>> ReadFile(string filename)
 {
     string Temp;
-    vector<int> plain;
-    vector<int> key;
-
+    vector<vector<int>> filedata;
+    vector<int> line1;
     ifstream input(filename+".txt");
     if (input.is_open())
     {
+        filedata.push_back(vector<int>());
         getline(input,Temp);
-        plain = StringtoBitStream(Temp);
+        line1 = StringtoBitStream(Temp,1);
+        filedata[0] = line1;
         getline(input,Temp);
-        key = StringtoBitStream(Temp);
-        plain.insert(plain.end(),key.begin(),key.end());
+        filedata.push_back(vector<int>());
+        filedata[1] = StringtoBitStream(Temp,1);
+        getline(input,Temp);
+        filedata.push_back(vector<int>());
+        filedata[2] = StringtoBitStream(Temp,0);
         input.close();
     }
     else
     {
         cout << "unable to openfile";
-        return plain;
+        return filedata;
     }
-    return plain;
+    return filedata;
 }
 
 void writetofile(vector<int> target,vector<int> target2,vector<int> target3,string filename)
@@ -259,13 +269,13 @@ void writetofile(vector<int> target,vector<int> target2,vector<int> target3,stri
 
 }
 
-vector<int> StringtoBitStream(string line)
+vector<int> StringtoBitStream(string line,int endofstream)
 {
     int bit;
     string bithold;
     vector<int> Result;
     unsigned long bits = line.length();
-    for(int i = 0;i<bits-1;i++)
+    for(int i = 0;i<bits-endofstream;i++)
     {
         bithold = line.substr(0,1);
         bit = stoi(bithold);
@@ -347,6 +357,19 @@ vector<int> Permutatekey(vector<int> target,vector<int> permutatemap)
     return Result;
 }
 
+int Compare(vector<int> target,vector<int> target2)
+{
+    int Result;
+    unsigned int size = target.size();
+    for(int i=0;i<size;i++)
+    {
+        if(target[i]!=target2[i])
+        {
+            Result++;
+        }
+    }
+    return Result;
+}
 
 vector<int> XOR(vector<int> Plaintext,vector<int> Key)
 {
@@ -750,37 +773,6 @@ vector<int> outerroundfunc(vector<int> plaintext,vector<vector<int>> FinalKeys, 
     return Permutatekey(ConcatenateVectors(PlainR[16],PlainL[16]),InversePerm);
 }
 
-void Encryption(string filename)
-{
-    vector<int> filedata=ReadFile(filename);
-    vector<int> plaintext = GetLeftSplit(filedata);
-    vector<int> Key = GetRightSplit(filedata);
-    vector<vector<int>> FinalKeys = Keygen(Key);
-    vector<int> FinalPT =  outerroundfunc(plaintext,FinalKeys,0);
-
-    cout<<"Permutated for Final Encypted String (Size "<< FinalPT.size()<< "bits):"<<endl;
-    PrintArray(FinalPT);
-
-
-    string savefile;
-    cout<<"Enter the filename to save under:"<<endl;
-    cin>>savefile;
-    writetofile(plaintext,Key,FinalPT,savefile);
-    return;
-
-}
-void Decryption(string filename)
-{
-    vector<int> filedata=ReadFile(filename);
-    vector<int> plaintext = GetLeftSplit(filedata);
-    vector<int> Key = GetRightSplit(filedata);
-    vector<vector<int>> FinalKeys = Keygen(Key);
-    vector<int> FinalPT =  outerroundfunc(plaintext,FinalKeys,1);
-
-    cout<<"Permutated for Final Encypted String (Size "<< FinalPT.size()<< "bits):"<<endl;
-    PrintArray(FinalPT);
-
-}
 
 //
 //0000 0001 0010 0011 0100 0101 0110 0111 1000 1001 1010 1011 1100 1101 1110 1111
