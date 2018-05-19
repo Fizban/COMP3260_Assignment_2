@@ -137,7 +137,7 @@ using namespace std;
  *
  */
 vector<vector<int>> ReadFile(string filename);
-void writetofile(vector<int> target,vector<int> target2,vector<int> target3,string filename);
+void writetofile(vector<int> Plaintext,vector<int> Key,vector<vector<vector<int>>> Final,string filename,int mode);
 vector<int> StringtoBitStream(string line,int endofstream);
 vector<int> GetLeftSplit(vector<int> target);
 vector<int> GetRightSplit(vector<int> target);
@@ -149,7 +149,7 @@ int Compare(vector<int> target,vector<int> target2);
 
 vector<int> XOR(vector<int> Plaintext,vector<int> Key);
 
-vector<int> RoundFunction(vector<int> Plaintext,vector<int> Key);
+vector<int> RoundFunction(vector<int> Plaintext,vector<int> Key,int DES);
 
 void PrintArray(vector<int> target);
 
@@ -167,7 +167,7 @@ vector<vector<int>> Keygen(vector<int> Key);
 
 vector<int> GenKiPi(vector<int> target);
 
-vector<vector<int>> outerroundfunc(vector<int> plaintext,vector<vector<int>> FinalKeys,int mode);
+vector<vector<int>> outerroundfunc(vector<int> plaintext,vector<vector<int>> FinalKeys,int mode,int DES);
 
 /* ==========================================================================================================
  * ----------------------------------------------------------------------------------------------------------
@@ -184,14 +184,42 @@ int main() {
 
     vector<vector<int>> filedata=ReadFile(filename);
     vector<int> plaintext = filedata[1];
+    vector<int> plaintexti = GenKiPi(plaintext);
     vector<int> Key = filedata[2];
+    vector<int> Keyi = GenKiPi(Key);
+
     cout<<"Key\n";
     PrintArray(Key);
     vector<vector<int>> FinalKeys = Keygen(Key);
-    vector<vector<int>> FinalPT =  outerroundfunc(plaintext,FinalKeys,filedata[0][0]);
+    vector<vector<int>> FinalKeysi = Keygen(Keyi);
+
+    vector<vector<vector<int>>> FinalPT;
+    for(int i=0;i<16;i++)
+    {
+        FinalPT.push_back(vector<vector<int>>());
+    }
+
+    FinalPT[0] =  outerroundfunc(plaintext,FinalKeys,filedata[0][0],0);
+    FinalPT[1] =  outerroundfunc(plaintexti,FinalKeys,filedata[0][0],0);
+    FinalPT[2] =  outerroundfunc(plaintext,FinalKeys,filedata[0][0],1);
+    FinalPT[3] =  outerroundfunc(plaintexti,FinalKeys,filedata[0][0],1);
+    FinalPT[4] =  outerroundfunc(plaintext,FinalKeys,filedata[0][0],2);
+    FinalPT[5] =  outerroundfunc(plaintexti,FinalKeys,filedata[0][0],2);
+    FinalPT[6] =  outerroundfunc(plaintext,FinalKeys,filedata[0][0],3);
+    FinalPT[7] =  outerroundfunc(plaintexti,FinalKeys,filedata[0][0],3);
+
+    FinalPT[8] =  outerroundfunc(plaintext,FinalKeys,filedata[0][0],0);
+    FinalPT[9] =  outerroundfunc(plaintext,FinalKeysi,filedata[0][0],0);
+    FinalPT[10] =  outerroundfunc(plaintext,FinalKeys,filedata[0][0],1);
+    FinalPT[11] =  outerroundfunc(plaintext,FinalKeysi,filedata[0][0],1);
+    FinalPT[12] =  outerroundfunc(plaintext,FinalKeys,filedata[0][0],2);
+    FinalPT[13] =  outerroundfunc(plaintext,FinalKeysi,filedata[0][0],2);
+    FinalPT[14] =  outerroundfunc(plaintext,FinalKeys,filedata[0][0],3);
+    FinalPT[15] =  outerroundfunc(plaintext,FinalKeysi,filedata[0][0],3);
+
 
     cout<<"Permutated for Final Encypted String (Size "<< FinalPT.size()<< "bits):"<<endl;
-    PrintArray(FinalPT[16]);
+    PrintArray(FinalPT[0][16]);
 
     cout<<"Plaintext\n";
     PrintArray(plaintext);
@@ -202,7 +230,8 @@ int main() {
     string savefile;
     cout<<"Enter the filename to save under:"<<endl;
     cin>>savefile;
-    writetofile(plaintext,Key,FinalPT[16],savefile);
+
+    writetofile(plaintext,Key,FinalPT,savefile,filedata[0][0]);
 
 
     return 0;
@@ -244,28 +273,63 @@ vector<vector<int>> ReadFile(string filename)
     return filedata;
 }
 
-void writetofile(vector<int> target,vector<int> target2,vector<int> target3,string filename)
+void writetofile(vector<int> Plaintext,vector<int> Key,vector<vector<vector<int>>> Final,string filename,int mode)
 {
-    unsigned long size = target.size();
+    unsigned long size = Plaintext.size();
     ofstream save;
     save.open (filename+".txt");
     save << "Plaintext P:";
     for(int i=0;i<size;i++)
     {
-        save << target[i];
+        save << Plaintext[i];
     }
 
     save << "\nKey K      :";
     for(int i=0;i<size;i++)
     {
-        save << target2[i];
+        save << Key[i];
     }
 
     save << "\nCipher-text:";
     for(int i=0;i<size;i++)
     {
-        save << target3[i];
+        save << Final[0][16][i];
     }
+    vector<vector<int>> Avalanche;
+
+    for(int i=0;i<8;i++)
+    {
+        Avalanche.emplace_back(vector<int>());
+    }
+
+        for(int i=0;i<16;i=i+2)
+        {
+            for(int z=0;z<8;z++)
+            {
+                for (int j = 0; j < 16; j++)
+                {
+                    Avalanche[z].push_back(Compare(Final[i][j], Final[i + 1][j]));
+                }
+            }
+        }
+
+
+
+    save<<"\n=-----------------------=\n";
+    save<<" |:   AVALANCHE ANALYSIS  :|\n";
+    save<<"\n=-----------------------=\n";
+    save<<"P and Pi under K\n";
+    save<<"ROUND            DES0            DES1            DES2            DES3\n";
+    for(int k=0;k<16;k++)
+    {
+        save <<k<<"          "<<Avalanche[0][k]<<"            "<<Avalanche[1][k]<<"             "<<Avalanche[2][k]<<"           "<<Avalanche[3][k]<<"\n";
+    }
+    save<<"P under K and Ki\n";
+    for(int k=0;k<16;k++)
+    {
+        save <<k<<"          "<<Avalanche[4][k]<<"            "<<Avalanche[5][k]<<"             "<<Avalanche[6][k]<<"           "<<Avalanche[7][k]<<"\n";
+    }
+
     save.close();
     return;
 
@@ -387,8 +451,31 @@ vector<int> XOR(vector<int> Plaintext,vector<int> Key)
 
 }
 
-vector<int> RoundFunction(vector<int> Plaintext,vector<int> Key)
+vector<int> RoundFunction(vector<int> Plaintext,vector<int> Key,int DES)
 {
+    vector<int> postsubperm
+            {
+                    16,   7,  20,  21,
+                    29,  12,  28,  17,
+                    1 ,  15,  23,  26,
+                    5 ,  18,  31,  10,
+                    2 ,  8 ,  24,  14,
+                    32,  27,   3,   9,
+                    19,  13,  30,   6,
+                    22,  11,   4,  25,
+            };
+    vector<int> InverseEtable
+            {
+                    2,  3,  4,  5,
+                    8,  9,  10, 11,
+                    14, 15, 16, 17,
+                    20, 21, 22, 23,
+                    26, 27, 28, 29,
+                    32, 33, 34, 35,
+                    38, 39, 40, 41,
+                    44, 45, 46, 47,
+            };
+
 
     cout<<endl<<"Pre Expanded right half of plaintext"<<endl;
     PrintArray(Plaintext);
@@ -409,19 +496,20 @@ vector<int> RoundFunction(vector<int> Plaintext,vector<int> Key)
 
     Result = Permutatekey(Plaintext,ETable);
     Result = XOR(Result,Key);
+    if(DES==0|DES==1)
+    {
     Result = Sbox(Result);
-    vector<int> postsubperm
-            {
-                16,   7,  20,  21,
-                29,  12,  28,  17,
-                1 ,  15,  23,  26,
-                5 ,  18,  31,  10,
-                2 ,  8 ,  24,  14,
-                32,  27,   3,   9,
-                19,  13,  30,   6,
-                22,  11,   4,  25,
-            };
-    Result=Permutatekey(Result,postsubperm);
+    }
+
+    if(DES==2|DES==3)
+    {
+        Result = Permutatekey(Result, InverseEtable);
+    }
+
+    if(DES==0|DES==2)
+    {
+        Result = Permutatekey(Result, postsubperm);
+    }
     cout<<endl<<"Final Result of the round(size "<<Result.size()<<"):"<<endl;
     PrintArray(Result);
 
@@ -659,14 +747,14 @@ vector<int> GenKiPi(vector<int> target)
     {
         target[0]=1;
     }
-    if(target[0]==1)
+    else
     {
         target[0]=0;
     }
     return target;
 }
 
-vector<vector<int>> outerroundfunc(vector<int> plaintext,vector<vector<int>> FinalKeys, int mode)
+vector<vector<int>> outerroundfunc(vector<int> plaintext,vector<vector<int>> FinalKeys, int mode,int DES)
 {
     vector<int> InitalPerm =
             {
@@ -713,7 +801,7 @@ vector<vector<int>> outerroundfunc(vector<int> plaintext,vector<vector<int>> Fin
     //Empties temppt incase of lingering values.
             Temppt.clear();
     //Pass the right half of plaintext and the 1st of the generated subkeys into round function.
-            Temppt = RoundFunction(PlainR[j], FinalKeys[j]);
+            Temppt = RoundFunction(PlainR[j], FinalKeys[j],DES);
     //Swaps values of left Plaintext onto right plaintext
             PlainR[j+1] = XOR(PlainL[j],Temppt);
     //Swaps values of Rounded right plaintext onto left Plaintext.
@@ -732,7 +820,7 @@ vector<vector<int>> outerroundfunc(vector<int> plaintext,vector<vector<int>> Fin
             //Empties temppt incase of lingering values.
             Temppt.clear();
             //Pass the right half of plaintext and the 1st of the generated subkeys into round function.
-            Temppt = RoundFunction(PlainR[j], FinalKeys[15-j]);
+            Temppt = RoundFunction(PlainR[j], FinalKeys[15-j],0);
             //Swaps values of left Plaintext onto right plaintext
             PlainR[j+1] = XOR(PlainL[j],Temppt);
             //Swaps values of Rounded right plaintext onto left Plaintext.
