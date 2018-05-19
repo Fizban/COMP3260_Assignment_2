@@ -165,7 +165,9 @@ vector<int> int_to_binary(int number);
 
 vector<vector<int>> Keygen(vector<int> Key);
 
-vector<int> outerroundfunc(vector<int> plaintext,vector<vector<int>> FinalKeys,int mode);
+vector<int> GenKiPi(vector<int> target);
+
+vector<vector<int>> outerroundfunc(vector<int> plaintext,vector<vector<int>> FinalKeys,int mode);
 
 /* ==========================================================================================================
  * ----------------------------------------------------------------------------------------------------------
@@ -186,10 +188,10 @@ int main() {
     cout<<"Key\n";
     PrintArray(Key);
     vector<vector<int>> FinalKeys = Keygen(Key);
-    vector<int> FinalPT =  outerroundfunc(plaintext,FinalKeys,filedata[0][0]);
+    vector<vector<int>> FinalPT =  outerroundfunc(plaintext,FinalKeys,filedata[0][0]);
 
     cout<<"Permutated for Final Encypted String (Size "<< FinalPT.size()<< "bits):"<<endl;
-    PrintArray(FinalPT);
+    PrintArray(FinalPT[16]);
 
     cout<<"Plaintext\n";
     PrintArray(plaintext);
@@ -200,7 +202,7 @@ int main() {
     string savefile;
     cout<<"Enter the filename to save under:"<<endl;
     cin>>savefile;
-    writetofile(plaintext,Key,FinalPT,savefile);
+    writetofile(plaintext,Key,FinalPT[16],savefile);
 
 
     return 0;
@@ -222,15 +224,15 @@ vector<vector<int>> ReadFile(string filename)
     ifstream input(filename+".txt");
     if (input.is_open())
     {
-        filedata.push_back(vector<int>());
+        filedata.emplace_back(vector<int>());
         getline(input,Temp);
         line1 = StringtoBitStream(Temp,1);
         filedata[0] = line1;
         getline(input,Temp);
-        filedata.push_back(vector<int>());
+        filedata.emplace_back(vector<int>());
         filedata[1] = StringtoBitStream(Temp,1);
         getline(input,Temp);
-        filedata.push_back(vector<int>());
+        filedata.emplace_back(vector<int>());
         filedata[2] = StringtoBitStream(Temp,0);
         input.close();
     }
@@ -391,13 +393,7 @@ vector<int> RoundFunction(vector<int> Plaintext,vector<int> Key)
     cout<<endl<<"Pre Expanded right half of plaintext"<<endl;
     PrintArray(Plaintext);
     vector<int> Result;
-    vector<int> expandedpt;
-    vector<int> expandedXORpt;
-    vector<int> expandedXORsubbedpt;
     Result.clear();
-    expandedpt.clear();
-    expandedXORpt.clear();
-    expandedXORsubbedpt.clear();
     //Initalizing the E-Table to expand the right block of the plaintext.
     vector<int> ETable
             {
@@ -411,16 +407,9 @@ vector<int> RoundFunction(vector<int> Plaintext,vector<int> Key)
                     28,    29,   30,    31,    32,    1,
             };
 
-    expandedpt = Permutatekey(Plaintext,ETable);
-    cout<<endl<<"Post Expanded right half of plaintext"<<endl;
-    PrintArray(expandedpt);
-    expandedXORpt = XOR(expandedpt,Key);
-    PrintArray(Key);
-    cout<<endl<<"Post XORED right half of plaintext"<<endl;
-    PrintArray(expandedXORpt);
-    expandedXORsubbedpt = Sbox(expandedXORpt);
-    cout<<endl<<"Post S-Boxed right half of plaintext"<<endl;
-    PrintArray(expandedXORsubbedpt);
+    Result = Permutatekey(Plaintext,ETable);
+    Result = XOR(Result,Key);
+    Result = Sbox(Result);
     vector<int> postsubperm
             {
                 16,   7,  20,  21,
@@ -432,13 +421,9 @@ vector<int> RoundFunction(vector<int> Plaintext,vector<int> Key)
                 19,  13,  30,   6,
                 22,  11,   4,  25,
             };
-    Result=Permutatekey(expandedXORsubbedpt,postsubperm);
+    Result=Permutatekey(Result,postsubperm);
     cout<<endl<<"Final Result of the round(size "<<Result.size()<<"):"<<endl;
     PrintArray(Result);
-
-
-
-
 
     return Result;
 }
@@ -626,19 +611,10 @@ vector<vector<int>> Keygen(vector<int> Key)
             };
     //Permutate the key using function
     vector<int> PermKey = Permutatekey(Key,KeyPerm);
-    //Printing keys
-    //cout<<"Inital Key:"<<endl;
-    //PrintArray(Key);
-    //cout<<"Permutate Key;"<<endl;
-    //PrintArray(PermKey);
 
     //Split the permutated key into left and right halves
     vector<int> LeftPermKey = GetLeftSplit(PermKey);
     vector<int> RightPermKey = GetRightSplit(PermKey);
-    //cout<<"Left Half of permutated Key:"<<endl;
-    //PrintArray(LeftPermKey);
-    //cout<<"Right Half of permutated Key:"<<endl;
-    //PrintArray(RightPermKey);
 
     //Set an array for the shift counts
     //eg for 11010 shift of 1 will result in "10101" and shift of 2 will result in "01011"
@@ -665,18 +641,9 @@ vector<vector<int>> Keygen(vector<int> Key)
             LeftPermKeyShift[i]=LeftShift(LeftPermKeyShift[i-1],shiftcount[i]);
             RightPermKeyShift[i]=LeftShift(RightPermKeyShift[i-1],shiftcount[i]);
         }
-        //Print out values for testing purposes
-        cout<<"Shift#"<<i<<" forcount"<<shiftcount[i]<<": ";
-        cout<<endl;
-        cout<<"LeftKey:";
-        PrintArray(LeftPermKeyShift[i]);
-        cout<<"RightKey:";
-        PrintArray(RightPermKeyShift[i]);
         //Concatenate the left and right halves before the are permutated and readly to XOR with plaintext
         Prepermutatedkeys[i]=ConcatenateVectors(LeftPermKeyShift[i],RightPermKeyShift[i]);
         //Print these values for testing.
-        cout<<"Prepermutateded concatenation:";
-        PrintArray(Prepermutatedkeys[i]);
         FinalKeys.push_back(vector<int>());
         FinalKeys[i] = Permutatekey(Prepermutatedkeys[i],KeyPerm2);
     }
@@ -684,7 +651,22 @@ vector<vector<int>> Keygen(vector<int> Key)
 
 }
 
-vector<int> outerroundfunc(vector<int> plaintext,vector<vector<int>> FinalKeys, int mode)
+
+
+vector<int> GenKiPi(vector<int> target)
+{
+    if(target[0]==0)
+    {
+        target[0]=1;
+    }
+    if(target[0]==1)
+    {
+        target[0]=0;
+    }
+    return target;
+}
+
+vector<vector<int>> outerroundfunc(vector<int> plaintext,vector<vector<int>> FinalKeys, int mode)
 {
     vector<int> InitalPerm =
             {
@@ -716,6 +698,9 @@ vector<int> outerroundfunc(vector<int> plaintext,vector<vector<int>> FinalKeys, 
     cout<<"Right split of plaintext:"<<endl;
     PrintArray(PlainR[0]);
 //Holds values for the left and right plaintext swap
+    vector<vector<int>> Result;
+
+
     vector<int> Temppt;
     if(mode==0)
     {
@@ -724,6 +709,7 @@ vector<int> outerroundfunc(vector<int> plaintext,vector<vector<int>> FinalKeys, 
             cout<<"================================================================================"<<endl;
             cout<<"==============================Round Funct #"<<j<<"===================================="<<endl;
             cout<<"================================================================================"<<endl;
+            Result.push_back(vector<int>());
     //Empties temppt incase of lingering values.
             Temppt.clear();
     //Pass the right half of plaintext and the 1st of the generated subkeys into round function.
@@ -732,6 +718,7 @@ vector<int> outerroundfunc(vector<int> plaintext,vector<vector<int>> FinalKeys, 
             PlainR[j+1] = XOR(PlainL[j],Temppt);
     //Swaps values of Rounded right plaintext onto left Plaintext.
             PlainL[j+1] = PlainR[j];
+            Result[j]=ConcatenateVectors(PlainR[j],PlainL[j]);
         }
     }
     if(mode==1)
@@ -741,6 +728,7 @@ vector<int> outerroundfunc(vector<int> plaintext,vector<vector<int>> FinalKeys, 
             cout<<"================================================================================"<<endl;
             cout<<"==============================Round Funct #"<<j<<"===================================="<<endl;
             cout<<"================================================================================"<<endl;
+            Result.push_back(vector<int>());
             //Empties temppt incase of lingering values.
             Temppt.clear();
             //Pass the right half of plaintext and the 1st of the generated subkeys into round function.
@@ -749,6 +737,8 @@ vector<int> outerroundfunc(vector<int> plaintext,vector<vector<int>> FinalKeys, 
             PlainR[j+1] = XOR(PlainL[j],Temppt);
             //Swaps values of Rounded right plaintext onto left Plaintext.
             PlainL[j+1] = PlainR[j];
+            Result[j]=ConcatenateVectors(PlainR[j],PlainL[j]);
+
         }
     }
 
@@ -770,7 +760,9 @@ vector<int> outerroundfunc(vector<int> plaintext,vector<vector<int>> FinalKeys, 
     PrintArray(PlainR[16]);
     cout<<"Concatenated:"<<endl;
     PrintArray(ConcatenateVectors(PlainR[16],PlainL[16]));
-    return Permutatekey(ConcatenateVectors(PlainR[16],PlainL[16]),InversePerm);
+    Result.push_back(vector<int>());
+    Result[16] = Permutatekey(ConcatenateVectors(PlainR[16],PlainL[16]),InversePerm);
+    return Result;
 }
 
 
