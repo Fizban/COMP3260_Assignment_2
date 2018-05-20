@@ -24,6 +24,55 @@ using namespace std;
  * ==========================================================================================================*/
 
 /*-----------------------------------------------------------------------------------------------------------
+ *
+ * Name:ReadFile(string filename)
+ * ----------------------------------------------------------------------------------------------------------
+ * Inital Conditions:
+ * Needs a filename as a string
+ *
+ * Exit Conditions:
+ * Returns the data contained in the file
+ *
+ * Description:
+ * Reads the file specified at filename location, parses the data and returns accordingly
+ * ----------------------------------------------------------------------------------------------------------
+ *
+ * Name:writetofile(vector<int> Plaintext, vector<int> Key, vector<vector<vector<int>>> Final,vector<vector<vector<int>>> Finali, string filename,int mode)
+ * ----------------------------------------------------------------------------------------------------------
+ * Inital Conditions:
+ * Needs all information from each version of DES and a file name to write to
+ *
+ * Exit Conditions:
+ * Returns complete and file should be located in current directory
+ *
+ * Description:
+ * Parses completed decryption/encryption from DES process and undertakes an avalanche analysis and finally writes results to a file
+ * ----------------------------------------------------------------------------------------------------------
+ *
+ * Name:StringtoBitStream(string line,int endofstream)
+ * ----------------------------------------------------------------------------------------------------------
+ * Inital Conditions:
+ * Needs a line and a length for how much of the string is to be converted
+ *
+ * Exit Conditions:
+ * Returns a vector filled with string contents
+ *
+ * Description:
+ * Parses a string for a specific length of characters and fills vector with contents
+ * ----------------------------------------------------------------------------------------------------------
+ *
+ * Name:StringtoBitStream(string line,int endofstream)
+ * ----------------------------------------------------------------------------------------------------------
+ * Inital Conditions:
+ * Needs a line and a length for how much of the string is to be converted
+ *
+ * Exit Conditions:
+ * Returns a vector filled with string contents
+ *
+ * Description:
+ * Parses a string for a specific length of characters and fills vector with contents
+ * ----------------------------------------------------------------------------------------------------------
+ *
  * Name:GetLeftSplit(vector<int> target)
  * ----------------------------------------------------------------------------------------------------------
  * Inital Conditions:
@@ -51,7 +100,6 @@ using namespace std;
  * vec.size, taking the second half od the vector
  * ----------------------------------------------------------------------------------------------------------
  *
- *
  * ----------------------------------------------------------------------------------------------------------
  * Name:Permutatekey(vector<int> target)
  * ----------------------------------------------------------------------------------------------------------
@@ -68,6 +116,44 @@ using namespace std;
  * ----------------------------------------------------------------------------------------------------------
  *
  * ----------------------------------------------------------------------------------------------------------
+ * Name:Compare(vector<int> target, vector<int> target2)
+ * ----------------------------------------------------------------------------------------------------------
+ * Inital Conditions:
+ * Needs 2 target vectors to compare
+ *
+ * Exit Conditions:
+ * Returns the number of differences
+ *
+ * Description:
+ * Compares the vectors against one another and counts number of differences
+ * ----------------------------------------------------------------------------------------------------------
+ *
+ * ----------------------------------------------------------------------------------------------------------
+ * Name:XOR(vector<int> Plaintext, vector<int> Key)
+ * ----------------------------------------------------------------------------------------------------------
+ * Inital Conditions:
+ * Needs a plaintext vector and key vector to xor
+ *
+ * Exit Conditions:
+ * Returns the resulting vector from the XOR process
+ *
+ * Description:
+ * Completes a XOR on two vectors and returns the resulting vector
+ * ----------------------------------------------------------------------------------------------------------
+ *
+ * ----------------------------------------------------------------------------------------------------------
+ * Name:RoundFunction(vector<int> Plaintext, vector<int> Key, int DES)
+ * ----------------------------------------------------------------------------------------------------------
+ * Inital Conditions:
+ * Needs a plaintext vector, a key vector and the mode DES to be used
+ *
+ * Exit Conditions:
+ * Returns the resulting vector from the round function of the DES type specified
+ *
+ * Description:
+ * Completes a round function as specified in the Assignment spec for either DES0, DES1, DES2, DES3
+ *
+ * ----------------------------------------------------------------------------------------------------------
  * Name:PrintArray(vector<int> target)
  * ----------------------------------------------------------------------------------------------------------
  * Inital Conditions:
@@ -78,6 +164,32 @@ using namespace std;
  *
  * Description:
  * takes a vector and checks each value then prints it out in chronological order
+ * ----------------------------------------------------------------------------------------------------------
+ *
+ * ----------------------------------------------------------------------------------------------------------
+ * Name:LeftShift(vector<int> target, int Shiftcount)
+ * ----------------------------------------------------------------------------------------------------------
+ * Inital Conditions:
+ * Needs a target vector and number of shifts to be made
+ *
+ * Exit Conditions:
+ * Returns the vector with shifted values
+ *
+ * Description:
+ * Shifts a vector's contents by the number of shiftcount to the left and returns
+ * ----------------------------------------------------------------------------------------------------------
+ *
+ * ----------------------------------------------------------------------------------------------------------
+ * Name:ConcatenateVectors(vector<int> firsthalf, vector<int> secondhalf)
+ * ----------------------------------------------------------------------------------------------------------
+ * Inital Conditions:
+ * Needs a two vectors to join
+ *
+ * Exit Conditions:
+ * Returns the vector of the two vectors joined together
+ *
+ * Description:
+ * Takes in two vectors and joins them together
  * ----------------------------------------------------------------------------------------------------------
  *
  * ----------------------------------------------------------------------------------------------------------
@@ -132,6 +244,45 @@ using namespace std;
  * Takes a vector and converts the integer to a binary equivalent vector
  * ----------------------------------------------------------------------------------------------------------
  *
+ * ----------------------------------------------------------------------------------------------------------
+ * Name: Keygen(vector<int> Key)
+ * ----------------------------------------------------------------------------------------------------------
+ * Initial Conditions:
+ * Needs a given Key
+ *
+ * Exit Conditions:
+ * Returns a set of keys generated for avalanche analysis
+ *
+ * Description:
+ * Takes a given key and generates multiple keys to be used in avalanche analysis
+ * ----------------------------------------------------------------------------------------------------------
+ *
+ * ----------------------------------------------------------------------------------------------------------
+ * Name: GenKiPi(vector<int> target)
+ * ----------------------------------------------------------------------------------------------------------
+ * Initial Conditions:
+ * Needs a given target vector
+ *
+ * Exit Conditions:
+ * Returns the target vector with an decryption/encryption leading bit
+ *
+ * Description:
+ * Takes a target vector for determining the process to be used
+ * ----------------------------------------------------------------------------------------------------------
+ *
+ * ----------------------------------------------------------------------------------------------------------
+ * Name: outterroundfunc(vector<int> plaintext, vector<vector<int>> FinalKeys, int mode, int DES)
+ * ----------------------------------------------------------------------------------------------------------
+ * Initial Conditions:
+ * Needs a given plaintext, FinalKey, mode and DES scheme
+ *
+ * Exit Conditions:
+ * Returns the completed first or last round of DES decryption/encryption
+ *
+ * Description:
+ * Completes either the first or last round of DES decryption/encryption
+ * ----------------------------------------------------------------------------------------------------------
+ *
  *
  *
  *
@@ -178,21 +329,25 @@ vector<vector<int>> outerroundfunc(vector<int> plaintext,vector<vector<int>> Fin
 
 
 int main() {
+    // Request the input file from the user
     string filename;
     cout<<"Please enter the file name you wish to read from(default 'input'):";
     cin >> filename;
 
+    // Parse the file data read from the file into vectors
     vector<vector<int>> filedata=ReadFile(filename);
     vector<int> plaintext = filedata[1];
     vector<int> plaintexti = GenKiPi(plaintext);
     vector<int> Key = filedata[2];
     vector<int> Keyi = GenKiPi(Key);
 
+    // Generate keys to used in round functions
     cout<<"Key\n";
     PrintArray(Key);
     vector<vector<int>> FinalKeys = Keygen(Key);
     vector<vector<int>> FinalKeysi = Keygen(Keyi);
 
+    // Fill first/final round of DES vector
     vector<vector<vector<int>>> FinalPT;
     vector<vector<vector<int>>> FinalPTi;
     for(int i=0;i<8;i++)
@@ -201,6 +356,7 @@ int main() {
         FinalPTi.push_back(vector<vector<int>>());
     }
 
+    // Run first/final round of DES depending on DES scenario eg(DES0, DES1, DES2, DES3)
     FinalPT[0] =  outerroundfunc(plaintext,FinalKeys,filedata[0][0],0);
     FinalPTi[0] =  outerroundfunc(plaintexti,FinalKeys,filedata[0][0],0);
     FinalPT[1] =  outerroundfunc(plaintext,FinalKeys,filedata[0][0],1);
@@ -220,6 +376,7 @@ int main() {
     FinalPTi[7] =  outerroundfunc(plaintext,FinalKeysi,filedata[0][0],3);
 
 
+    //Print functions for debugging
     cout<<"Permutated for Final Encypted String (Size "<< FinalPT.size()<< "bits):"<<endl;
     PrintArray(FinalPT[0][16]);
 
@@ -229,6 +386,7 @@ int main() {
     PrintArray(Key);
     cout<<"Different bits: "<<Compare(plaintext,Key);
 
+    //Request user input for file to write output to
     string savefile;
     cout<<"Enter the filename to save under:"<<endl;
     cin>>savefile;
@@ -249,6 +407,7 @@ int main() {
 
 vector<vector<int>> ReadFile(string filename)
 {
+    // Parse file data into vectors and return list of vectors
     string Temp;
     vector<vector<int>> filedata;
     vector<int> line1;
@@ -277,6 +436,7 @@ vector<vector<int>> ReadFile(string filename)
 
 void writetofile(vector<int> Plaintext,vector<int> Key,vector<vector<vector<int>>> Final,vector<vector<vector<int>>> Finali,string filename,int mode)
 {
+    // Write header to file
     unsigned long size = Plaintext.size();
     ofstream save;
     save.open (filename+".txt");
@@ -309,6 +469,7 @@ void writetofile(vector<int> Plaintext,vector<int> Key,vector<vector<vector<int>
         save << Final[0][16][i];
     }
 
+    // If encryption, complete avalanche analysis and write results to file
     if(mode==0)
     {
         vector<vector<int>> Avalanche;
@@ -357,6 +518,7 @@ void writetofile(vector<int> Plaintext,vector<int> Key,vector<vector<vector<int>
 
 vector<int> StringtoBitStream(string line,int endofstream)
 {
+    // Take string character by character and fill vector with contents for specified length
     int bit;
     string bithold;
     vector<int> Result;
@@ -373,7 +535,7 @@ vector<int> StringtoBitStream(string line,int endofstream)
 
 vector<int> GetLeftSplit(vector<int> target)
 {
-  //Initialize the array to be returned
+  // Split vector in half and take the left half
     unsigned int size = (target.size())/2;
   static vector<int> LeftVec;
   LeftVec.clear();
@@ -387,6 +549,7 @@ vector<int> GetLeftSplit(vector<int> target)
 
 vector<int> GetRightSplit(vector<int> target)
 {
+    // Split vector in half and take the right half
     unsigned int size = target.size();
     static vector<int> RightVec;
     RightVec.clear();
@@ -402,6 +565,7 @@ vector<int> GetRightSplit(vector<int> target)
 
 void PrintArray(vector<int> target)
 {
+    // Function used for debugging by printing the entire contents of array
     unsigned int size = target.size();
     //Step through the array until specified "size" is reached
     for(unsigned int i=0;i<size;i++)
@@ -445,6 +609,8 @@ vector<int> Permutatekey(vector<int> target,vector<int> permutatemap)
 
 int Compare(vector<int> target,vector<int> target2)
 {
+    // Take two vectors and compare each element by one another and count the number of differences
+    // Function mainly used for avalanche analysis
     int Result;
     unsigned int size = target.size();
     for(int i=0;i<size;i++)
@@ -459,6 +625,7 @@ int Compare(vector<int> target,vector<int> target2)
 
 vector<int> XOR(vector<int> Plaintext,vector<int> Key)
 {
+    // Take the XOR of two vectors and return the resulting vector
     vector<int> Result;
     unsigned long size = Plaintext.size();
     for(unsigned int i=0;i<size;i++)
@@ -473,6 +640,7 @@ vector<int> XOR(vector<int> Plaintext,vector<int> Key)
 
 vector<int> RoundFunction(vector<int> Plaintext,vector<int> Key,int DES)
 {
+    // Static array declaration
     vector<int> postsubperm
             {
                     16,   7,  20,  21,
@@ -516,6 +684,7 @@ vector<int> RoundFunction(vector<int> Plaintext,vector<int> Key,int DES)
 
     Result = Permutatekey(Plaintext,ETable);
     Result = XOR(Result,Key);
+    // Complete round function depending on DES scenario selected (eg DES0, DES1, DES2, DES3)
     if(DES==0|DES==1)
     {
     Result = Sbox(Result);
@@ -551,7 +720,7 @@ vector<int> LeftShift(vector<int> target,int Shiftcount)
 
 vector<int> ConcatenateVectors(vector<int> firsthalf,vector<int> secondhalf)
 {
-
+    // Function used for joining to vectors together into a single vector
     for(int i=0;i<secondhalf.size();i++)
     {
         firsthalf.push_back(secondhalf[i]);
