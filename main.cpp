@@ -137,7 +137,7 @@ using namespace std;
  *
  */
 vector<vector<int>> ReadFile(string filename);
-void writetofile(vector<int> Plaintext,vector<int> Key,vector<vector<vector<int>>> Final,string filename,int mode);
+void writetofile(vector<int> Plaintext,vector<int> Key,vector<vector<vector<int>>> Final,vector<vector<vector<int>>> Finali,string filename,int mode);
 vector<int> StringtoBitStream(string line,int endofstream);
 vector<int> GetLeftSplit(vector<int> target);
 vector<int> GetRightSplit(vector<int> target);
@@ -194,28 +194,30 @@ int main() {
     vector<vector<int>> FinalKeysi = Keygen(Keyi);
 
     vector<vector<vector<int>>> FinalPT;
-    for(int i=0;i<16;i++)
+    vector<vector<vector<int>>> FinalPTi;
+    for(int i=0;i<8;i++)
     {
         FinalPT.push_back(vector<vector<int>>());
+        FinalPTi.push_back(vector<vector<int>>());
     }
 
     FinalPT[0] =  outerroundfunc(plaintext,FinalKeys,filedata[0][0],0);
-    FinalPT[1] =  outerroundfunc(plaintexti,FinalKeys,filedata[0][0],0);
-    FinalPT[2] =  outerroundfunc(plaintext,FinalKeys,filedata[0][0],1);
-    FinalPT[3] =  outerroundfunc(plaintexti,FinalKeys,filedata[0][0],1);
-    FinalPT[4] =  outerroundfunc(plaintext,FinalKeys,filedata[0][0],2);
-    FinalPT[5] =  outerroundfunc(plaintexti,FinalKeys,filedata[0][0],2);
-    FinalPT[6] =  outerroundfunc(plaintext,FinalKeys,filedata[0][0],3);
-    FinalPT[7] =  outerroundfunc(plaintexti,FinalKeys,filedata[0][0],3);
+    FinalPTi[0] =  outerroundfunc(plaintexti,FinalKeys,filedata[0][0],0);
+    FinalPT[1] =  outerroundfunc(plaintext,FinalKeys,filedata[0][0],1);
+    FinalPTi[1] =  outerroundfunc(plaintexti,FinalKeys,filedata[0][0],1);
+    FinalPT[2] =  outerroundfunc(plaintext,FinalKeys,filedata[0][0],2);
+    FinalPTi[2] =  outerroundfunc(plaintexti,FinalKeys,filedata[0][0],2);
+    FinalPT[3] =  outerroundfunc(plaintext,FinalKeys,filedata[0][0],3);
+    FinalPTi[3] =  outerroundfunc(plaintexti,FinalKeys,filedata[0][0],3);
 
-    FinalPT[8] =  outerroundfunc(plaintext,FinalKeys,filedata[0][0],0);
-    FinalPT[9] =  outerroundfunc(plaintext,FinalKeysi,filedata[0][0],0);
-    FinalPT[10] =  outerroundfunc(plaintext,FinalKeys,filedata[0][0],1);
-    FinalPT[11] =  outerroundfunc(plaintext,FinalKeysi,filedata[0][0],1);
-    FinalPT[12] =  outerroundfunc(plaintext,FinalKeys,filedata[0][0],2);
-    FinalPT[13] =  outerroundfunc(plaintext,FinalKeysi,filedata[0][0],2);
-    FinalPT[14] =  outerroundfunc(plaintext,FinalKeys,filedata[0][0],3);
-    FinalPT[15] =  outerroundfunc(plaintext,FinalKeysi,filedata[0][0],3);
+    FinalPT[4] =  outerroundfunc(plaintext,FinalKeys,filedata[0][0],0);
+    FinalPTi[4] =  outerroundfunc(plaintext,FinalKeysi,filedata[0][0],0);
+    FinalPT[5] =  outerroundfunc(plaintext,FinalKeys,filedata[0][0],1);
+    FinalPTi[5] =  outerroundfunc(plaintext,FinalKeysi,filedata[0][0],1);
+    FinalPT[6] =  outerroundfunc(plaintext,FinalKeys,filedata[0][0],2);
+    FinalPTi[6] =  outerroundfunc(plaintext,FinalKeysi,filedata[0][0],2);
+    FinalPT[7] =  outerroundfunc(plaintext,FinalKeys,filedata[0][0],3);
+    FinalPTi[7] =  outerroundfunc(plaintext,FinalKeysi,filedata[0][0],3);
 
 
     cout<<"Permutated for Final Encypted String (Size "<< FinalPT.size()<< "bits):"<<endl;
@@ -231,7 +233,7 @@ int main() {
     cout<<"Enter the filename to save under:"<<endl;
     cin>>savefile;
 
-    writetofile(plaintext,Key,FinalPT,savefile,filedata[0][0]);
+    writetofile(plaintext,Key,FinalPT,FinalPTi,savefile,filedata[0][0]);
 
 
     return 0;
@@ -273,62 +275,80 @@ vector<vector<int>> ReadFile(string filename)
     return filedata;
 }
 
-void writetofile(vector<int> Plaintext,vector<int> Key,vector<vector<vector<int>>> Final,string filename,int mode)
+void writetofile(vector<int> Plaintext,vector<int> Key,vector<vector<vector<int>>> Final,vector<vector<vector<int>>> Finali,string filename,int mode)
 {
     unsigned long size = Plaintext.size();
     ofstream save;
     save.open (filename+".txt");
-    save << "Plaintext P:";
+
+    if(mode == 0)
+    {save << "Plaintext P:";}
+    if(mode == 1)
+    {save << "CipherText      :";}
+
     for(int i=0;i<size;i++)
     {
         save << Plaintext[i];
     }
+    if(mode == 0)
+    {save << "\nKey K      :";}
+    if(mode == 1)
+    {save << "\nKey K           :";}
 
-    save << "\nKey K      :";
     for(int i=0;i<size;i++)
     {
         save << Key[i];
     }
+    if(mode == 0)
+    {save << "\nCipher-text:";}
+    if(mode == 1)
+    {save << "\nDecyphered Text :";}
 
-    save << "\nCipher-text:";
     for(int i=0;i<size;i++)
     {
         save << Final[0][16][i];
     }
-    vector<vector<int>> Avalanche;
 
-    for(int i=0;i<8;i++)
+    if(mode==0)
     {
-        Avalanche.emplace_back(vector<int>());
-    }
-
-        for(int i=0;i<16;i=i+2)
+        vector<vector<int>> Avalanche;
+        for(int i=0;i<8;i++)
         {
-            for(int z=0;z<8;z++)
+            Avalanche.emplace_back(vector<int>());
+        }
+
+
+        for(int z=0;z<8;z++)
+        {
+            for (int j = 0; j < 16; j++)
             {
-                for (int j = 0; j < 16; j++)
-                {
-                    Avalanche[z].push_back(Compare(Final[i][j], Final[i + 1][j]));
-                }
+                Avalanche[z].push_back(Compare(Final[z][j], Finali[z][j]));
             }
         }
 
 
+        save<<"\n=-----------------------=\n";
+        save<<"|:  AVALANCHE ANALYSIS  :|";
+        save<<"\n=-----------------------=\n";
+        save<<"======================================================================\n";
+        save<<"P and Pi under K\n";
+        save<<"======================================================================\n";
+        save<<"ROUND            DES0            DES1            DES2            DES3\n";
+        for(int k=0;k<16;k++)
+        {
+            save <<k<<"                 "<<Avalanche[0][k]<<"             "<<Avalanche[1][k]<<"                "<<Avalanche[2][k]<<"               "<<Avalanche[3][k]<<"\n";
+        }
+        save<<"======================================================================\n";
+        save<<"P under K and Ki\n";
+        save<<"======================================================================\n";
+        save<<"ROUND            DES0            DES1            DES2            DES3\n";
+        for(int k=0;k<16;k++)
+        {
+            save <<k<<"                 "<<Avalanche[4][k]<<"             "<<Avalanche[5][k]<<"                "<<Avalanche[6][k]<<"               "<<Avalanche[7][k]<<"\n";
+        }
+        save<<"======================================================================\n";
+    }
 
-    save<<"\n=-----------------------=\n";
-    save<<" |:   AVALANCHE ANALYSIS  :|\n";
-    save<<"\n=-----------------------=\n";
-    save<<"P and Pi under K\n";
-    save<<"ROUND            DES0            DES1            DES2            DES3\n";
-    for(int k=0;k<16;k++)
-    {
-        save <<k<<"          "<<Avalanche[0][k]<<"            "<<Avalanche[1][k]<<"             "<<Avalanche[2][k]<<"           "<<Avalanche[3][k]<<"\n";
-    }
-    save<<"P under K and Ki\n";
-    for(int k=0;k<16;k++)
-    {
-        save <<k<<"          "<<Avalanche[4][k]<<"            "<<Avalanche[5][k]<<"             "<<Avalanche[6][k]<<"           "<<Avalanche[7][k]<<"\n";
-    }
 
     save.close();
     return;
