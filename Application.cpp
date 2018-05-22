@@ -1,22 +1,20 @@
+/*
+Project Name: COMP 3260 Assignment 2
+Date:22/5/18
+
+Students responsible:
+Jack McKew - c3232675
+Sebastian Webster - c3175527
+*/
+
+
 #include <iostream>
 #include <algorithm>
 #include <fstream>
 #include <vector>
 #include <string>
 #include "static_arrays.h"
-//731
-
 using namespace std;
-/* https://github.com/Fizban/COMP3260_Assignment_2/commits/master
- * 1.Fileread/Write
- * 2.Parser
- * 3.E-Table
- * 4.XOR
- * 5.S-Box
- * 6.Permutate
- * 7.Avalanche Analysis
- */
-
 /* ==========================================================================================================
  * ----------------------------------------------------------------------------------------------------------
  * ----------------------------------------------FUNCTION DECLARATIONS---------------------------------------
@@ -520,16 +518,47 @@ vector<int> StringtoBitStream(string line,int endofstream)
 {
     // Take string character by character and fill vector with contents for specified length
     int bit;
+    int count=0;
     string bithold;
     vector<int> Result;
     unsigned long bits = line.length();
-    for(int i = 0;i<bits-endofstream;i++)
+    if(endofstream==1)
     {
-        bithold = line.substr(0,1);
-        bit = stoi(bithold);
-        Result.push_back(bit);
-        line = line.substr(1);
+        for(int i = 0;i<bits-endofstream;i++)
+        {
+            bithold = line.substr(0,1);
+            bit = stoi(bithold);
+            Result.push_back(bit);
+            line = line.substr(1);
+        }
     }
+    if(endofstream==0)
+    {
+        for(int i = 0;i<bits-endofstream;i++)
+        {
+            bithold = line.substr(0,1);
+            bit = stoi(bithold);
+            if(bit==1)
+            {
+                count++;
+            }
+            Result.push_back(bit);
+            if(i%7==0)
+            {
+                if((count%2)!=0)
+                {
+                    Result.push_back(0);
+                }
+                if((count%2)==0)
+                {
+                    Result.push_back(1);
+                }
+                count=0;
+            }
+            line = line.substr(1);
+        }
+    }
+
     return Result;
 }
 

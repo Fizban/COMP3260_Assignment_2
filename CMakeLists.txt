@@ -3,4 +3,4 @@ project(COMP3260_Assignment_2)
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_executable(COMP3260_Assignment_2 main.cpp static_arrays.h)
+add_executable(COMP3260_Assignment_2 Application.cpp static_arrays.h)
