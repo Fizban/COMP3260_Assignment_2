@@ -2,7 +2,7 @@ COMP3260 ASSIGNMENT TWO - README.txt
 
 Files included in this project:
 
-  main.cpp
+	main.cpp
   README.txt
   static_arrays.h
 
@@ -10,14 +10,14 @@ Files included in this project:
 
 Students responsible:
 Jack McKew - c3232675
-Sebastian Webster - c3175527
+Sebastian Webster -  c3175527
 
 ------------------------------------------------------------------------------------------------------
 
 Main:
 This class takes input from a file* using a command line parser** and uses the DES algorithm to either
 encrypyt or decrypt plaintext/ciphertext and avalanche analysis in the window. The plaintext/ciphertext
-is then output as text.
+is then outputted as text.
 
 Static_Arrays.h:
 Contains Substitution box table since it cannot be altered
