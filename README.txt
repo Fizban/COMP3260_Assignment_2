@@ -3,9 +3,13 @@ COMP3260 ASSIGNMENT TWO - README.txt
 Files included in this project:
 
 	main.cpp
-  README.txt
-  static_arrays.h
-
+    README.txt
+    static_arrays.h
+    Makefile
+    input.txt
+    output.txt
+    COMP3260_Assignment_2.exe
+    **A zip of the entire project in case of error
 ------------------------------------------------------------------------------------------------------
 
 Students responsible:
