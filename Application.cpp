@@ -386,7 +386,7 @@ int main() {
 
     //Request user input for file to write output to
     string savefile;
-    cout<<"Enter the filename to save under:"<<endl;
+    cout<<"\nEnter the filename to save under:"<<endl;
     cin>>savefile;
 
     writetofile(plaintext,Key,FinalPT,FinalPTi,savefile,filedata[0][0]);
