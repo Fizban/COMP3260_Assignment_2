@@ -438,7 +438,6 @@ void writetofile(vector<int> Plaintext,vector<int> Key,vector<vector<vector<int>
     unsigned long size = Plaintext.size();
     ofstream save;
     save.open (filename+".txt");
-
     if(mode == 0)
     {save << "Plaintext P:";}
     if(mode == 1)
@@ -542,8 +541,7 @@ vector<int> StringtoBitStream(string line,int endofstream)
             {
                 count++;
             }
-            Result.push_back(bit);
-            if(i%7==0)
+            if(i%7==0 && i!=0 || i == 55)
             {
                 if((count%2)!=0)
                 {
@@ -555,6 +553,7 @@ vector<int> StringtoBitStream(string line,int endofstream)
                 }
                 count=0;
             }
+            Result.push_back(bit);
             line = line.substr(1);
         }
     }
